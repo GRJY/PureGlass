@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Xcode (proje XcodeGen ile project.yml'den üretilir — regenerate: `xcodegen generate`)
+*.xcodeproj
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+.build/
+.swiftpm/
+
+# Scratch
+*.log
