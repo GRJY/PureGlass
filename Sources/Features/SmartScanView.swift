@@ -70,6 +70,10 @@ struct SmartScanView: View {
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
+            Text("\(model.scanBytesFound.formattedBytes) bulundu")
+                .font(.headline.monospacedDigit())
+                .foregroundStyle(.tint)
+                .contentTransition(.numericText())
         }
         .padding(DS.Spacing.xxl)
     }
@@ -78,6 +82,9 @@ struct SmartScanView: View {
 
     private var results: some View {
         VStack(spacing: 0) {
+            if model.lockedCategories > 0 {
+                lockedBanner
+            }
             if model.results.isEmpty {
                 emptyResults
             } else {
@@ -96,6 +103,24 @@ struct SmartScanView: View {
             }
             cleanBar
         }
+    }
+
+    private var lockedBanner: some View {
+        HStack(spacing: DS.Spacing.s) {
+            Image(systemName: "lock.fill").foregroundStyle(DS.Palette.caution)
+            Text("\(model.lockedCategories) kategori Tam Disk Erişimi olmadan atlandı.")
+                .font(.callout)
+            Spacer()
+            Button("Ayarları Aç") {
+                NSWorkspace.shared.open(model.permissions.settingsURL)
+                model.permissions.startPolling()
+            }
+            .buttonStyle(.glass)
+            .controlSize(.small)
+        }
+        .padding(.horizontal, DS.Spacing.l)
+        .padding(.vertical, DS.Spacing.s)
+        .background(DS.Palette.caution.opacity(0.12))
     }
 
     private var emptyResults: some View {

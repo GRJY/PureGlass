@@ -20,6 +20,8 @@ final class AppViewModel {
     var selectedURLs: Set<URL> = []
     var scanProgress: Double = 0
     var scanStatusText = ""
+    var scanBytesFound: Int64 = 0
+    var lockedCategories = 0
     var logLines: [LogLine] = []
     var report: CleanReport?
 
@@ -75,9 +77,11 @@ final class AppViewModel {
             await MainActor.run {
                 self?.scanProgress = progress.fraction
                 self?.scanStatusText = progress.currentTitle
+                self?.scanBytesFound = progress.bytesFound
             }
         }
 
+        lockedCategories = scanned.filter { !$0.isAccessible }.count
         results = scanned.filter { $0.isAccessible && !$0.items.isEmpty }
         // Güvenli (yeşil) öğeleri önceden seç.
         for result in results where result.risk == .safe {
