@@ -8,6 +8,7 @@ struct ShowcaseView: View {
     @State private var progress: Double = 0
     @State private var lines: [LogLine] = []
     @State private var reclaimed: Double = 0  // GB
+    @State private var permissions = PermissionCoordinator()
 
     private let samplePaths: [(String, LogLine.Status)] = [
         ("~/Library/Caches/com.apple.Safari/WebKitCache", .deleted),
@@ -26,6 +27,7 @@ struct ShowcaseView: View {
         ScrollView {
             VStack(spacing: DS.Spacing.xl) {
                 header
+                FullDiskAccessCard(coordinator: permissions)
                 statsRow
                 progressAndLog
                 riskBadges
