@@ -23,6 +23,7 @@ targets:
     platform: macOS
     sources:
       - path: Sources/App
+      - path: Sources/DesignSystem
       - path: Sources/Resources
     dependencies:
       - target: PureGlassKit
