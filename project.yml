@@ -24,6 +24,7 @@ targets:
     sources:
       - path: Sources/App
       - path: Sources/DesignSystem
+      - path: Sources/Features
       - path: Sources/Resources
     dependencies:
       - target: PureGlassKit
