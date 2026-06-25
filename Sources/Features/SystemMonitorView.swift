@@ -1,7 +1,6 @@
 import SwiftUI
 import Observation
 import AppKit
-import Charts
 import PureGlassKit
 
 /// CPU geçmiş grafiği için tek nokta.
@@ -137,24 +136,38 @@ struct SystemMonitorView: View {
         }
     }
 
+    // Canvas tabanlı smooth CPU geçmiş grafiği. Swift Charts'ın her veri değişiminde
+    // tüm görünümü yeniden kurup yanıp sönmesini önler; Canvas yalnızca yeniden çizer.
     private var cpuHistoryChart: some View {
-        Chart(model.cpuHistory) { p in
-            AreaMark(x: .value("t", p.id), y: .value("cpu", p.value))
-                .interpolationMethod(.catmullRom)
-                .foregroundStyle(.linearGradient(
-                    colors: [DS.Palette.accent.opacity(0.45), DS.Palette.accent.opacity(0.04)],
-                    startPoint: .top, endPoint: .bottom))
-            LineMark(x: .value("t", p.id), y: .value("cpu", p.value))
-                .interpolationMethod(.catmullRom)
-                .foregroundStyle(DS.Palette.accent)
-                .lineStyle(StrokeStyle(lineWidth: 2))
+        Canvas { ctx, size in
+            let pts = model.cpuHistory
+            guard pts.count > 1 else { return }
+            let n = pts.count
+            func cgPoint(_ i: Int) -> CGPoint {
+                let x = size.width * CGFloat(i) / CGFloat(n - 1)
+                let y = size.height * (1 - CGFloat(min(max(pts[i].value, 0), 1)))
+                return CGPoint(x: x, y: y)
+            }
+            // Catmull-Rom benzeri yumuşatma: ardışık noktalar arası quad eğriler.
+            var line = Path()
+            line.move(to: cgPoint(0))
+            for i in 0..<(n - 1) {
+                let p0 = cgPoint(i), p1 = cgPoint(i + 1)
+                let mid = CGPoint(x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2)
+                line.addQuadCurve(to: mid, control: p0)
+                line.addQuadCurve(to: p1, control: mid)
+            }
+            var fill = line
+            fill.addLine(to: CGPoint(x: size.width, y: size.height))
+            fill.addLine(to: CGPoint(x: 0, y: size.height))
+            fill.closeSubpath()
+            ctx.fill(fill, with: .linearGradient(
+                Gradient(colors: [DS.Palette.accent.opacity(0.40), DS.Palette.accent.opacity(0.02)]),
+                startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: size.height)))
+            ctx.stroke(line, with: .color(DS.Palette.accent),
+                       style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
         }
-        .chartXScale(domain: (model.cpuHistory.first?.id ?? 0)...(max((model.cpuHistory.first?.id ?? 0) + 1, model.cpuHistory.last?.id ?? 1)))
-        .chartYScale(domain: 0...1)
-        .chartXAxis(.hidden)
-        .chartYAxis(.hidden)
         .frame(height: 64)
-        .animation(.linear(duration: 0.5), value: model.cpuHistory)
     }
 
     private func cpuLegend(_ label: String, _ value: Double, _ color: Color) -> some View {

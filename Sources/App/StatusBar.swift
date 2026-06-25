@@ -58,7 +58,7 @@ final class StatusBarController: NSObject {
 
         host = NSHostingView(rootView: MenuPanelView(model: model))
         host.frame = CGRect(origin: .zero, size: host.fittingSize)
-        host.autoresizingMask = [.width, .minYMargin]   // panel boyu değişince üst kenara sabit kal
+        host.autoresizingMask = [.width, .height]       // panelle birlikte yumuşak büyür/küçülür
 
         panel = NSPanel(
             contentRect: host.frame,
@@ -123,21 +123,16 @@ final class StatusBarController: NSObject {
     /// Üst kenar sabit kalır (panel menü çubuğundan aşağı sarkar).
     private func resizePanel(to size: CGSize) {
         guard size.width > 1, size.height > 1 else { return }
-        guard panel.isVisible else {
-            host.frame = CGRect(origin: .zero, size: size)
-            panel.setContentSize(size)
-            return
-        }
+        guard panel.isVisible else { panel.setContentSize(size); return }
 
         let topY = panel.frame.maxY
         var f = panel.frame
         f.size = size
-        f.origin.y = topY - size.height          // üst kenarı sabitle
-        // host'u son boyutuna getir, panel içeriğinin üstüne yapıştır (minYMargin korur).
-        host.frame = CGRect(x: 0, y: panel.frame.height - size.height, width: size.width, height: size.height)
+        f.origin.y = topY - size.height          // üst kenarı sabitle (menü çubuğundan sarkar)
         NSAnimationContext.runAnimationGroup { ctx in
-            ctx.duration = 0.24
+            ctx.duration = 0.28
             ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            ctx.allowsImplicitAnimation = true
             panel.animator().setFrame(f, display: true)
         }
     }

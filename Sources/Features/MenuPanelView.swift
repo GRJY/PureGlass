@@ -134,6 +134,8 @@ struct MenuPanelView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .top)
+            .id(tab)
+            .transition(.opacity)
 
             Divider().opacity(0.3)
             footer
@@ -203,16 +205,17 @@ struct MenuPanelView: View {
     }
 
     private var systemTab: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.m) {
+        VStack(alignment: .leading, spacing: DS.Spacing.s) {
             meterRow("İşlemci", "cpu", "%\(Int((sys.cpu * 100).rounded()))",
-                     value: sys.cpu, tint: DS.Palette.accent)
+                     fraction: sys.cpu, tint: DS.Palette.accent, valueColor: DS.Palette.accent)
             meterRow("Bellek", "memorychip", sys.memUsed.formattedBytes,
-                     value: sys.memFraction, tint: sys.memFraction > 0.9 ? DS.Palette.danger : DS.Palette.safe)
-
-            HStack(spacing: DS.Spacing.m) {
-                metric("Sıcaklık", sys.temp.map { "\(Int($0.rounded()))°" } ?? "—", tempColor(sys.temp))
-                metric("Fan", sys.fan.map { "\(Int($0)) RPM" } ?? "—", .primary)
-            }
+                     fraction: sys.memFraction,
+                     tint: sys.memFraction > 0.9 ? DS.Palette.danger : DS.Palette.safe, valueColor: .primary)
+            meterRow("Sıcaklık", "thermometer.medium", sys.temp.map { "\(Int($0.rounded()))°" } ?? "—",
+                     fraction: (sys.temp ?? 0) / 100, tint: tempColor(sys.temp), valueColor: tempColor(sys.temp))
+            meterRow("Fan", "fanblades", sys.fan.map { "\(Int($0)) RPM" } ?? "—",
+                     fraction: sys.fanInfo.map { $0.max > 0 ? $0.current / $0.max : 0 } ?? 0,
+                     tint: DS.Palette.accent, valueColor: .primary)
 
             VStack(spacing: 2) {
                 row("Sistem Monitörü'nü Aç", "gauge.with.dots.needle.67percent") {
@@ -225,18 +228,19 @@ struct MenuPanelView: View {
         }
     }
 
-    /// Etiket + değer + ilerleme çubuğu (CPU/Bellek için).
-    private func meterRow(_ title: String, _ symbol: String, _ value: String, value fraction: Double, tint: Color) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+    /// Etiket + değer + ilerleme çubuğu (tüm sistem metrikleri için tutarlı).
+    private func meterRow(_ title: String, _ symbol: String, _ value: String,
+                          fraction: Double, tint: Color, valueColor: Color) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
             HStack {
                 Label(title, systemImage: symbol).font(.iCaption.weight(.medium)).foregroundStyle(.secondary)
                 Spacer()
                 Text(value).font(.iCallout.weight(.semibold).monospacedDigit())
-                    .foregroundStyle(tint == DS.Palette.safe ? .primary : tint)
+                    .foregroundStyle(valueColor)
                     .contentTransition(.numericText())
             }
             ProgressView(value: min(max(fraction, 0), 1)).tint(tint)
-                .animation(.easeInOut(duration: 0.4), value: fraction)
+                .animation(.easeInOut(duration: 0.45), value: fraction)
         }
     }
 
@@ -353,8 +357,6 @@ struct MenuPanelView: View {
 
     private var footer: some View {
         HStack {
-            Text("Lokalde çalışır • telemetri yok")
-                .font(.iCaption2).foregroundStyle(.tertiary)
             Spacer()
             Button("Çık") { NSApp.terminate(nil) }
                 .buttonStyle(.plain)
