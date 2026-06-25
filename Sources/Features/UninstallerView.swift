@@ -79,7 +79,7 @@ struct UninstallerView: View {
                 Text("Uygulama Kaldırıcı").font(.dsTitle)
                 Text("Bir uygulamayı çöpe atmak yetmez; geride ayar ve veri dosyaları kalır. Burası uygulamayı bu artıklarıyla birlikte eksiksiz kaldırır — önce neyi sileceğini sana gösterir.")
                     .font(.caption).foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(2)
             }
             Spacer()
             if let msg = model.resultMessage {
