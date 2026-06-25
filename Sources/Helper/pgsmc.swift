@@ -77,8 +77,9 @@ struct PGSMC {
             let rpm = Swift.max(mn, Swift.min(mx, req))
             let wMode = write("F0Md", [1])
             let wTarget = write("F0Tg", floatBytes(rpm))
-            let back = Double(readFloat("F0Tg") ?? -1)   // doğrula: hedef gerçekten yazıldı mı
-            ok = wMode && wTarget && abs(back - Double(rpm)) < 100
+            // Doğrula: manuel mod gerçekten devrede mi (F0Md == 1). F0Tg geri-okuması
+            // bazı SMC sürümlerinde anlık hedefe eşit gelmeyebilir, o yüzden moda bakıyoruz.
+            ok = wMode && wTarget && (readByte("F0Md") ?? 0) == 1
         default:
             print("pgsmc: bilinmeyen komut"); exit(1)
         }

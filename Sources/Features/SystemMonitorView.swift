@@ -69,19 +69,33 @@ final class SystemMonitorViewModel {
 struct SystemMonitorView: View {
     @State private var model = SystemMonitorViewModel()
 
-    private let cols = [GridItem(.adaptive(minimum: 280), spacing: DS.Spacing.m)]
+    private let cols = [
+        GridItem(.flexible(), spacing: DS.Spacing.m, alignment: .top),
+        GridItem(.flexible(), spacing: DS.Spacing.m, alignment: .top)
+    ]
 
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: cols, spacing: DS.Spacing.m) {
-                cpuCard
-                memoryCard
-                thermalCard
-                fanCard
+            VStack(spacing: 0) {
+                HStack {
+                    Label("Sistem Monitörü", systemImage: "gauge.with.dots.needle.67percent")
+                        .font(.dsDisplay(30))
+                    Spacer()
+                    Text("Canlı · saniyede güncellenir").font(.caption).foregroundStyle(.secondary)
+                }
+                .padding(.bottom, DS.Spacing.m)
+
+                LazyVGrid(columns: cols, spacing: DS.Spacing.m) {
+                    cpuCard
+                    memoryCard
+                    thermalCard
+                    fanCard
+                }
             }
-            .padding(DS.Spacing.l)
+            .padding(DS.Spacing.xl)
+            .frame(maxWidth: 1000)
+            .frame(maxWidth: .infinity)
         }
-        .navigationTitle("Sistem Monitörü")
         .task { model.start() }
         .onDisappear { model.stop() }
     }
