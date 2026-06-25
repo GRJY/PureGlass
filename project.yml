@@ -33,6 +33,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.giray.pureglass
         PRODUCT_NAME: PureGlass
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # App Store DIŞI, non-sandboxed: Full Disk Access için zorunlu.
         ENABLE_APP_SANDBOX: NO
         GENERATE_INFOPLIST_FILE: YES

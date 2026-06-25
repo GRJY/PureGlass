@@ -29,8 +29,8 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
 
     var available: Bool {
         switch self {
-        case .smartScan, .settings: true
-        case .uninstaller, .spaceLens: false   // FAZ 7+ — yakında
+        case .smartScan, .settings, .spaceLens: true
+        case .uninstaller: false   // yakında
         }
     }
 }
@@ -81,14 +81,12 @@ struct ContentView: View {
             SmartScanView(model: model)
         case .settings:
             SettingsView(model: model)
+        case .spaceLens:
+            SpaceLensView()
         case .uninstaller:
             ComingSoonView(title: "Uygulama Kaldırıcı",
                            symbol: "trash.square",
                            detail: "Uygulamaları tüm artıklarıyla (container, prefs, cache, login item) birlikte kaldırma. Çok-seviyeli eşleştirme motoru ile yakında.")
-        case .spaceLens:
-            ComingSoonView(title: "Disk Haritası",
-                           symbol: "chart.pie",
-                           detail: "Disk kullanımının treemap görselleştirmesi. Hangi klasörün ne kadar yer kapladığını tek bakışta gör.")
         }
     }
 }

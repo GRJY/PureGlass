@@ -17,6 +17,8 @@ hiçbir veri internete gitmez, telemetri yoktur ve **her silinen dosyanın tam y
 - **Trash-first** — kullanıcı dosyaları kalıcı silinmez; geri alınabilir Çöp Kutusu'na gider.
 - **Derin Sistem Temizliği** (opsiyonel) — sistem önbellek/günlüklerini de temizler; tek
   yönetici parolası istemiyle, ayrı ve daha katı bir güvenlik kapısından geçerek.
+- **Disk Haritası** — disk kullanımının squarified treemap görselleştirmesi; klasöre
+  tıklayıp içine inerek (drill-down) hangi klasörün ne kadar yer kapladığını gör.
 - **Şeffaf Liquid Glass arayüz** — macOS 26 (Tahoe) cam efektleri.
 - **Tam offline** — telemetri/ağ erişimi yok.
 
@@ -98,7 +100,7 @@ enjeksiyonu engellenir. Bu mantık birim testlerle (gerçek komut çalıştırı
 
 - **Notarization** (geniş dağıtım için): ücretli Apple Developer hesabı gerektirir.
   Gerektiğinde: `ENABLE_HARDENED_RUNTIME=YES` + Developer ID ile imza + `notarytool submit`.
-- Uninstaller (çok-seviyeli app eşleştirme), Disk Haritası (treemap).
+- Uninstaller (çok-seviyeli app eşleştirme).
 
 ## Lisans / Gizlilik
 
