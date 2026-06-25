@@ -18,7 +18,7 @@ final class AppViewModel {
 
     /// Kenar çubuğu seçimi (menü çubuğu paneliyle paylaşılır → derin bağlantı).
     var selectedSection: SidebarItem? =
-        (ProcessInfo.processInfo.environment["PUREGLASS_START"] == "spaceLens") ? .spaceLens : .smartScan
+        SidebarItem(rawValue: ProcessInfo.processInfo.environment["PUREGLASS_START"] ?? "") ?? .smartScan
 
     var phase: Phase = .idle
     var results: [CategoryScanResult] = []

@@ -42,87 +42,80 @@ struct SecurityView: View {
     @State private var model = SecurityViewModel()
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-            Divider().opacity(0.3)
-            content
+        Group {
+            if model.scanning { scanning }
+            else if !model.scanned { idle }
+            else if model.threats.isEmpty { clean }
+            else { results }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .animation(DS.Anim.smooth, value: model.scanning)
+        .animation(DS.Anim.smooth, value: model.scanned)
     }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack {
-                Text("Güvenlik Taraması").font(.dsTitle)
-                Spacer()
-                if let msg = model.resultMessage {
-                    Text(msg).font(.caption).foregroundStyle(.secondary)
-                }
-            }
-            Text("Kalıcılık konumlarını (launch agent/daemon, ~/.zshrc, cron, emond, hosts) tarar ve her çalıştırılabilir öğenin KOD İMZASINI doğrular (KnockKnock yaklaşımı). Apple/Developer-ID imzalı öğeler güvenilir sayılır; imzasız/ad-hoc/bozuk imzalı kalıcı öğeler işaretlenir. Lokalde çalışır; bulut antivirüs değildir.")
-                .font(.caption).foregroundStyle(.tertiary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(DS.Spacing.m)
-    }
-
-    @ViewBuilder
-    private var content: some View {
-        if model.scanning {
-            centered {
-                ProgressView().controlSize(.large)
-                Text("Tehditler taranıyor…").foregroundStyle(.secondary)
-            }
-        } else if !model.scanned {
-            centered {
+    private var idle: some View {
+        ScrollView {
+            VStack(spacing: DS.Spacing.l) {
                 Image(systemName: "shield.lefthalf.filled")
                     .font(.system(size: 60, weight: .light))
                     .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(.tint)
-                Text("Mac'ini zararlı yazılımlara karşı tara").font(.dsTitle)
-                Button {
-                    Task { await model.scan() }
-                } label: {
+                Text("Güvenlik Taraması").font(.dsDisplay(36))
+                Text("Kalıcılık konumlarını (launch agent/daemon, ~/.zshrc, cron, emond, hosts) tarar ve her öğenin KOD İMZASINI doğrular (KnockKnock yaklaşımı). Apple/Developer-ID imzalı öğeler güvenilir sayılır; imzasız/ad-hoc/bozuk imzalı kalıcı öğeler işaretlenir. Lokalde çalışır; bulut antivirüs değildir.")
+                    .font(.callout).foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center).frame(maxWidth: 560)
+                Button { Task { await model.scan() } } label: {
                     Label("Taramayı Başlat", systemImage: "shield")
+                        .font(.title3.weight(.semibold))
                         .padding(.horizontal, DS.Spacing.l).padding(.vertical, DS.Spacing.s)
                 }
                 .buttonStyle(.glassProminent).tint(.accentColor).controlSize(.extraLarge)
             }
-        } else if model.threats.isEmpty {
-            centered {
-                Image(systemName: "checkmark.shield.fill")
-                    .font(.system(size: 64)).foregroundStyle(DS.Palette.safe)
-                Text("Tehdit bulunamadı").font(.dsDisplay(30))
-                Text("Bilinen göstergeler ve şüpheli kalıcı görevler bulunamadı.")
-                    .foregroundStyle(.secondary)
-                Button("Tekrar Tara") { Task { await model.scan() } }.buttonStyle(.glass)
-            }
-        } else {
-            VStack(spacing: 0) {
-                List {
-                    ForEach(model.threats) { threat in
-                        ThreatRow(threat: threat,
-                                  onReveal: { model.reveal(threat) },
-                                  onQuarantine: { model.quarantine(threat) })
-                    }
-                }
-                .scrollContentBackground(.hidden)
-                HStack {
-                    Label("\(model.threats.count) bulgu", systemImage: "exclamationmark.triangle.fill")
-                        .foregroundStyle(DS.Palette.caution)
-                    Spacer()
-                    Button("Tekrar Tara") { Task { await model.scan() } }.buttonStyle(.glass)
-                }
-                .padding(DS.Spacing.l)
-                .glassEffect(.regular, in: .rect(cornerRadius: DS.Radius.l))
-                .padding(.horizontal, DS.Spacing.m).padding(.bottom, DS.Spacing.m)
-            }
+            .padding(DS.Spacing.xxl).frame(maxWidth: .infinity)
         }
     }
 
-    private func centered<C: View>(@ViewBuilder _ content: () -> C) -> some View {
-        VStack(spacing: DS.Spacing.m) { content() }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(DS.Spacing.xxl)
+    private var scanning: some View {
+        VStack(spacing: DS.Spacing.m) {
+            ProgressView().controlSize(.large)
+            Text("Tehditler taranıyor…").foregroundStyle(.secondary)
+        }
+        .padding(DS.Spacing.xxl)
+    }
+
+    private var clean: some View {
+        VStack(spacing: DS.Spacing.m) {
+            Image(systemName: "checkmark.shield.fill").font(.system(size: 64)).foregroundStyle(DS.Palette.safe)
+            Text("Tehdit bulunamadı").font(.dsDisplay(30))
+            Text("Bilinen göstergeler ve şüpheli kalıcı görevler bulunamadı.").foregroundStyle(.secondary)
+            Button("Tekrar Tara") { Task { await model.scan() } }.buttonStyle(.glass)
+        }
+        .padding(DS.Spacing.xxl)
+    }
+
+    private var results: some View {
+        VStack(spacing: 0) {
+            List {
+                ForEach(model.threats) { threat in
+                    ThreatRow(threat: threat,
+                              onReveal: { model.reveal(threat) },
+                              onQuarantine: { model.quarantine(threat) })
+                }
+            }
+            .scrollContentBackground(.hidden)
+            HStack {
+                Label("\(model.threats.count) bulgu", systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(DS.Palette.caution)
+                if let msg = model.resultMessage {
+                    Text(msg).font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button("Tekrar Tara") { Task { await model.scan() } }.buttonStyle(.glass)
+            }
+            .padding(DS.Spacing.l)
+            .glassEffect(.regular, in: .rect(cornerRadius: DS.Radius.l))
+            .padding(.horizontal, DS.Spacing.m).padding(.bottom, DS.Spacing.m)
+        }
     }
 }
 

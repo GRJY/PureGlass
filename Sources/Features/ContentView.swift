@@ -41,9 +41,11 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            List(SidebarItem.allCases, selection: $model.selectedSection) { item in
-                Label(item.title, systemImage: item.symbol)
-                    .tag(item)
+            List(selection: $model.selectedSection) {
+                ForEach(SidebarItem.allCases) { item in
+                    Label(item.title, systemImage: item.symbol)
+                        .tag(item)
+                }
             }
             .navigationTitle("PureGlass")
             .scrollContentBackground(.hidden)
