@@ -22,6 +22,9 @@ final class SystemDataViewModel {
     var logLines: [LogLine] = []
     var report: CleanReport?
 
+    var snapshotCount = 0
+    var snapshotBusy = false
+
     init() {
         // Geniş SafetyGuard: sistem-veri köklerinin ALT öğeleri silinebilir (hepsi trash-first / geri alınabilir).
         cleaningEngine = CleaningEngine(safety: SafetyGuard(allowedRoots: database.systemData.map(\.url)))
@@ -45,6 +48,17 @@ final class SystemDataViewModel {
         let urls = r.items.map(\.url)
         if urls.allSatisfy(selectedURLs.contains) { urls.forEach { selectedURLs.remove($0) } }
         else { urls.forEach { selectedURLs.insert($0) } }
+    }
+
+    func refreshSnapshots() {
+        snapshotCount = TimeMachineService.localSnapshotDates().count
+    }
+
+    func deleteSnapshots() async {
+        snapshotBusy = true
+        try? TimeMachineService.deleteAllLocalSnapshots()
+        refreshSnapshots()
+        snapshotBusy = false
     }
 
     func scan() async {
@@ -106,6 +120,38 @@ struct SystemDataView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .animation(DS.Anim.smooth, value: model.phase)
+        .task { model.refreshSnapshots() }
+    }
+
+    /// Time Machine yerel anlık görüntüleri — "Sistem Verileri"nin en büyük gizli bileşeni.
+    @ViewBuilder
+    private var snapshotCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: DS.Spacing.s) {
+                HStack {
+                    Label("Time Machine Anlık Görüntüleri", systemImage: "clock.arrow.2.circlepath")
+                        .font(.dsTitle)
+                    Spacer()
+                    Text("\(model.snapshotCount) adet")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(model.snapshotCount > 0 ? DS.Palette.caution : DS.Palette.safe)
+                }
+                Text("Bunlar DOSYA DEĞİL, APFS anlık görüntüleridir — \"Sistem Verileri\"nin çoğunu bunlar oluşturabilir (dosya taramasında görünmez). macOS 24 saatte bir otomatik siler; istersen şimdi silebilirsin. Boş alan olarak sayılırlar, silmek güvenlidir.")
+                    .font(.callout).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if model.snapshotCount > 0 {
+                    Button {
+                        Task { await model.deleteSnapshots() }
+                    } label: {
+                        Label(model.snapshotBusy ? "Siliniyor…" : "Anlık Görüntüleri Sil",
+                              systemImage: "trash").padding(.horizontal, DS.Spacing.s)
+                    }
+                    .buttonStyle(.glassProminent).tint(DS.Palette.caution).disabled(model.snapshotBusy)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(maxWidth: 560)
     }
 
     private var idle: some View {
@@ -124,8 +170,9 @@ struct SystemDataView: View {
                     }
                 }
                 .frame(maxWidth: 560)
+                snapshotCard
                 Button { Task { await model.scan() } } label: {
-                    Label("Sistem Verilerini Tara", systemImage: "magnifyingglass")
+                    Label("Dosya-tabanlı Sistem Verilerini Tara", systemImage: "magnifyingglass")
                         .font(.title3.weight(.semibold)).padding(.horizontal, DS.Spacing.l).padding(.vertical, DS.Spacing.s)
                 }
                 .buttonStyle(.glassProminent).tint(.accentColor).controlSize(.extraLarge)

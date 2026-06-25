@@ -9,11 +9,12 @@ struct SpaceLensView: View {
     private let home = FileManager.default.homeDirectoryForCurrentUser
 
     @State private var stack: [URL] = []
+    @State private var rootURL = FileManager.default.homeDirectoryForCurrentUser
     @State private var entries: [DiskMapEntry] = []
     @State private var loading = false
     @State private var scanID = 0
 
-    private var current: URL { stack.last ?? home }
+    private var current: URL { stack.last ?? rootURL }
     private var totalSize: Int64 { entries.reduce(0) { $0 + $1.size } }
 
     var body: some View {
@@ -22,13 +23,39 @@ struct SpaceLensView: View {
             Divider().opacity(0.3)
             content
         }
-        .task { if stack.isEmpty { stack = [home]; await load() } }
+        .task { if stack.isEmpty { stack = [rootURL]; await load() } }
     }
 
     // MARK: - Breadcrumb
 
+    private var rootMenu: some View {
+        Menu {
+            Button("Ana Klasör", systemImage: "house") { setRoot(home) }
+            Button("Tüm Disk (/)", systemImage: "internaldrive") { setRoot(URL(filePath: "/")) }
+            Divider()
+            Button("Xcode/Simülatör (/Library/Developer)", systemImage: "hammer") { setRoot(URL(filePath: "/Library/Developer")) }
+            Button("Homebrew (/opt/homebrew)", systemImage: "terminal") { setRoot(URL(filePath: "/opt/homebrew")) }
+            Button("/usr/local", systemImage: "terminal") { setRoot(URL(filePath: "/usr/local")) }
+            Button("Ollama (~/.ollama)", systemImage: "brain.head.profile") { setRoot(home.appending(path: ".ollama")) }
+            Button("Konteynerler", systemImage: "shippingbox") { setRoot(home.appending(path: "Library/Containers")) }
+            Button("/Library", systemImage: "building.columns") { setRoot(URL(filePath: "/Library")) }
+        } label: {
+            Label("Konum", systemImage: "folder.badge.gearshape")
+        }
+        .menuStyle(.borderlessButton)
+        .fixedSize()
+    }
+
+    private var rootDisplayName: String {
+        if rootURL.path == "/" { return "Tüm Disk" }
+        if rootURL.path == home.path { return "Ana Klasör" }
+        return rootURL.lastPathComponent.isEmpty ? rootURL.path : rootURL.lastPathComponent
+    }
+
     private var breadcrumb: some View {
         HStack(spacing: DS.Spacing.xs) {
+            rootMenu
+            Divider().frame(height: 14)
             ForEach(Array(stack.enumerated()), id: \.offset) { index, url in
                 if index > 0 {
                     Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary)
@@ -36,7 +63,7 @@ struct SpaceLensView: View {
                 Button {
                     navigate(to: index)
                 } label: {
-                    Text(index == 0 ? "Ana Klasör" : url.lastPathComponent)
+                    Text(index == 0 ? rootDisplayName : url.lastPathComponent)
                         .font(.callout.weight(index == stack.count - 1 ? .semibold : .regular))
                         .lineLimit(1)
                 }
@@ -116,6 +143,12 @@ struct SpaceLensView: View {
     }
 
     // MARK: - Yükleme / gezinme
+
+    private func setRoot(_ url: URL) {
+        rootURL = url
+        stack = [url]
+        Task { await load() }
+    }
 
     private func navigate(to index: Int) {
         guard index < stack.count - 1 else { return }

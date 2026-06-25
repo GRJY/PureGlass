@@ -130,8 +130,11 @@ public struct LocationsDatabase: Sendable {
         addSD("sd.user.logs", .userLogs, "Kullanıcı Günlükleri", "Library/Logs", risk: .safe,
               "Uygulama günlükleri; güvenle silinebilir.")
         addSD("sd.trash", .trash, "Çöp Kutusu", ".Trash", risk: .safe, "Çöp kutusu içeriği.")
-        addSD("sd.developer", .developerJunk, "Geliştirici (Xcode vb.)", "Library/Developer", risk: .caution,
+        addSD("sd.developer", .developerJunk, "Geliştirici (Kullanıcı — Xcode)", "Library/Developer", risk: .caution,
               "DerivedData, DeviceSupport, Simulators, Arşivler.")
+        addSD("sd.system.developer", .developerJunk, "Geliştirici (Sistem — Simülatör Ortamları)",
+              absolute: "/Library/Developer", risk: .caution, root: true,
+              "iOS simülatör çalıştırma ortamları (runtimes) — genelde en büyük 'Sistem Verisi'. Xcode yeniden indirir.")
         addSD("sd.mail", .mailAttachments, "Mail", "Library/Mail", risk: .caution,
               "Mail verileri ve indirilen ekler.")
         addSD("sd.containers", .containers, "Konteynerler", "Library/Containers", risk: .danger,
