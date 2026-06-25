@@ -176,16 +176,15 @@ struct SystemMonitorView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(model.memory.used.formattedBytes).font(.dsDisplay(30)).monospacedDigit()
                     Text("/ \(model.memory.total.formattedBytes)").font(.iCallout).foregroundStyle(.secondary)
+                    Spacer()
+                    HStack(spacing: 5) {
+                        Circle().fill(pressureColor).frame(width: 8, height: 8)
+                        Text(model.memory.pressureTitle).font(.iCaption.weight(.semibold)).foregroundStyle(pressureColor)
+                    }
                 }
                 ProgressView(value: model.memory.usedFraction)
                     .tint(model.memory.usedFraction > 0.9 ? DS.Palette.danger : DS.Palette.safe)
                     .animation(.easeInOut(duration: 0.4), value: model.memory.usedFraction)
-                HStack {
-                    Text("Bellek baskısı").font(.iCaption).foregroundStyle(.secondary)
-                    Spacer()
-                    Text(model.memory.pressureTitle).font(.iCaption.weight(.semibold))
-                        .foregroundStyle(pressureColor)
-                }
                 Button {
                     NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/Utilities/Activity Monitor.app"))
                 } label: {
@@ -245,10 +244,8 @@ struct SystemMonitorView: View {
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
                         Text("\(Int(fan.current))").font(.dsDisplay(34)).monospacedDigit().contentTransition(.numericText())
                         Text("RPM").font(.iCallout).foregroundStyle(.secondary)
-                        if fan.current == 0 { Text("(boşta)").font(.iCaption).foregroundStyle(.tertiary) }
+                        Spacer()
                     }
-                    ProgressView(value: fan.max > 0 ? fan.current / fan.max : 0).tint(DS.Palette.accent)
-                    Text("Min \(Int(fan.min)) · Maks \(Int(fan.max))").font(.iCaption).foregroundStyle(.secondary)
                     fanControls(fan)
                 } else {
                     Text("Bu Mac'te fan yok veya okunamıyor (ör. MacBook Air).")
@@ -261,13 +258,15 @@ struct SystemMonitorView: View {
     @ViewBuilder
     private func fanControls(_ fan: FanInfo) -> some View {
         if model.fanControlSupported, fan.max > fan.min {
-            Divider().opacity(0.2)
             Text("Manuel hız (yönetici parolası ister)").font(.iCaption.weight(.medium)).foregroundStyle(.secondary)
-            HStack {
-                Text("\(Int(model.fanTarget)) RPM").font(.iCallout.monospacedDigit()).frame(width: 90, alignment: .leading)
+            HStack(spacing: DS.Spacing.s) {
+                Text("\(Int(fan.min))").font(.iCaption2).foregroundStyle(.tertiary)
                 Slider(value: Binding(get: { model.fanTarget }, set: { model.fanTarget = $0 }),
                        in: fan.min...fan.max, step: 50)
+                Text("\(Int(fan.max))").font(.iCaption2).foregroundStyle(.tertiary)
             }
+            Text("\(Int(model.fanTarget)) RPM").font(.iCallout.weight(.semibold).monospacedDigit())
+                .contentTransition(.numericText())
             HStack(spacing: DS.Spacing.s) {
                 Button { Task { await model.applyManualFan() } } label: {
                     Label("Uygula", systemImage: "wind").padding(.horizontal, 4)
@@ -278,11 +277,12 @@ struct SystemMonitorView: View {
                 if model.fanBusy { ProgressView().controlSize(.small) }
                 Spacer()
             }
-            Text("⚠️ Manuel modda fan yük altında otomatik hızlanmaz. İşin bitince \"Normale Dön\".")
-                .font(.iCaption2).foregroundStyle(DS.Palette.caution).fixedSize(horizontal: false, vertical: true)
-            if let e = model.fanError { Text(e).font(.iCaption2).foregroundStyle(DS.Palette.danger) }
+            if let e = model.fanError {
+                Text(e).font(.iCaption2).foregroundStyle(DS.Palette.danger)
+            } else {
+                Text("Manuel modda fan otomatik hızlanmaz.").font(.iCaption2).foregroundStyle(.tertiary)
+            }
         } else if !model.fanControlSupported {
-            Divider().opacity(0.2)
             Text("Fan kontrolü bu çipte (M3+) Apple tarafından kısıtlı — yalnızca okuma.")
                 .font(.iCaption2).foregroundStyle(.tertiary).fixedSize(horizontal: false, vertical: true)
         }

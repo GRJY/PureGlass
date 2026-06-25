@@ -14,7 +14,14 @@ final class PanelMetrics {
     var memUsed: Int64 = 0
     var memFraction: Double = 0
     var temp: Double?
-    var fan: Double?
+    var fanInfo: FanInfo?
+    var fan: Double? { fanInfo?.current }
+
+    // Fan kontrolü (yalnız M1/M2)
+    let fanControlSupported = SystemMetrics.fanControlSupported
+    var fanTarget: Double = 2500
+    var fanBusy = false
+    var fanError: String?
 
     private var task: Task<Void, Never>?
 
@@ -35,7 +42,20 @@ final class PanelMetrics {
         let m = SystemMetrics.memory()
         memUsed = m.used; memFraction = m.usedFraction
         temp = smc?.cpuTemperature()
-        fan = smc?.fan()?.current
+        fanInfo = smc?.fan()
+    }
+
+    func applyManualFan() async {
+        fanBusy = true; fanError = nil
+        do { try FanController.setManual(rpm: Int(fanTarget)) }
+        catch { fanError = error.localizedDescription }
+        fanBusy = false
+    }
+    func setAutoFan() async {
+        fanBusy = true; fanError = nil
+        do { try FanController.setAuto() }
+        catch { fanError = error.localizedDescription }
+        fanBusy = false
     }
 }
 
@@ -80,6 +100,14 @@ final class DiskMonitor {
     }
 }
 
+enum PanelTab: String, CaseIterable, Identifiable {
+    case cleaning, system, fan
+    var id: String { rawValue }
+    var title: String {
+        switch self { case .cleaning: "Temizlik"; case .system: "Sistem"; case .fan: "Fan" }
+    }
+}
+
 /// Menü çubuğundan açılan tek parça Liquid Glass panel.
 /// Barındıran NSPanel tam şeffaf; bu kart tek gerçek cam yüzeydir.
 struct MenuPanelView: View {
@@ -88,37 +116,27 @@ struct MenuPanelView: View {
 
     @State private var disk = DiskMonitor()
     @State private var sys = PanelMetrics()
+    @State private var tab: PanelTab = .cleaning
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.m) {
             header
-            diskMetrics
-            Divider().opacity(0.3)
-            systemMetrics
-            Divider().opacity(0.3)
-            VStack(spacing: 2) {
-                row("Hızlı Tarama", "magnifyingglass") {
-                    model.selectedSection = .smartScan
-                    onOpenMain()
-                    Task { await model.scan() }
-                }
-                row("Güvenlik Taraması", "shield.lefthalf.filled") {
-                    model.selectedSection = .security
-                    onOpenMain()
-                }
-                row("Sistem Monitörü", "gauge.with.dots.needle.67percent") {
-                    model.selectedSection = .monitor
-                    onOpenMain()
-                }
-                row("Disk Haritası", "chart.pie") {
-                    model.selectedSection = .spaceLens
-                    onOpenMain()
-                }
-                row("Uygulama Kaldırıcı", "trash.square") {
-                    model.selectedSection = .uninstaller
-                    onOpenMain()
+
+            Picker("", selection: $tab) {
+                ForEach(PanelTab.allCases) { Text($0.title).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+
+            Group {
+                switch tab {
+                case .cleaning: cleaningTab
+                case .system: systemTab
+                case .fan: fanTab
                 }
             }
+            .animation(.easeInOut(duration: 0.2), value: tab)
+
             Divider().opacity(0.3)
             footer
         }
@@ -128,6 +146,86 @@ struct MenuPanelView: View {
         .padding(10)
         .task { disk.start(); sys.start() }
         .onDisappear { disk.stop(); sys.stop() }
+    }
+
+    // MARK: - Sekmeler
+
+    private var cleaningTab: some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.m) {
+            diskMetrics
+            VStack(spacing: 2) {
+                row("Hızlı Tarama", "magnifyingglass") {
+                    model.selectedSection = .smartScan; onOpenMain(); Task { await model.scan() }
+                }
+                row("Güvenlik Taraması", "shield.lefthalf.filled") {
+                    model.selectedSection = .security; onOpenMain()
+                }
+                row("Disk Haritası", "chart.pie") {
+                    model.selectedSection = .spaceLens; onOpenMain()
+                }
+                row("Uygulama Kaldırıcı", "trash.square") {
+                    model.selectedSection = .uninstaller; onOpenMain()
+                }
+            }
+        }
+    }
+
+    private var systemTab: some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.m) {
+            systemMetrics
+            VStack(spacing: 2) {
+                row("Sistem Monitörü'nü Aç", "gauge.with.dots.needle.67percent") {
+                    model.selectedSection = .monitor; onOpenMain()
+                }
+                row("Bakım", "wrench.and.screwdriver") {
+                    model.selectedSection = .maintenance; onOpenMain()
+                }
+            }
+        }
+    }
+
+    private var fanTab: some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.s) {
+            if let fan = sys.fanInfo {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text("\(Int(fan.current))").font(.dsDisplay(34)).monospacedDigit().contentTransition(.numericText())
+                    Text("RPM").font(.iCallout).foregroundStyle(.secondary)
+                    Spacer()
+                }
+
+                if sys.fanControlSupported, fan.max > fan.min {
+                    Text("Manuel hız (yönetici parolası ister)").font(.iCaption2).foregroundStyle(.secondary)
+                    HStack(spacing: DS.Spacing.s) {
+                        Text("\(Int(fan.min))").font(.iCaption2).foregroundStyle(.tertiary)
+                        Slider(value: Binding(get: { sys.fanTarget }, set: { sys.fanTarget = $0 }), in: fan.min...fan.max, step: 50)
+                        Text("\(Int(fan.max))").font(.iCaption2).foregroundStyle(.tertiary)
+                    }
+                    Text("\(Int(sys.fanTarget)) RPM").font(.iCallout.weight(.semibold).monospacedDigit()).contentTransition(.numericText())
+                    HStack(spacing: DS.Spacing.s) {
+                        Button { Task { await sys.applyManualFan() } } label: {
+                            Label("Uygula", systemImage: "wind")
+                        }
+                        .buttonStyle(.borderedProminent).controlSize(.small).disabled(sys.fanBusy)
+                        Button("Normale Dön") { Task { await sys.setAutoFan() } }
+                            .buttonStyle(.bordered).controlSize(.small).disabled(sys.fanBusy)
+                        if sys.fanBusy { ProgressView().controlSize(.small) }
+                        Spacer()
+                    }
+                    if let e = sys.fanError {
+                        Text(e).font(.iCaption2).foregroundStyle(DS.Palette.danger).lineLimit(2)
+                    } else {
+                        Text("Manuel modda fan otomatik hızlanmaz.").font(.iCaption2).foregroundStyle(.tertiary)
+                    }
+                } else if !sys.fanControlSupported {
+                    Text("Fan kontrolü bu çipte (M3+) Apple tarafından kısıtlı — yalnızca okuma.")
+                        .font(.iCaption2).foregroundStyle(.tertiary).fixedSize(horizontal: false, vertical: true)
+                }
+            } else {
+                Text("Bu Mac'te fan yok veya okunamıyor (ör. MacBook Air).")
+                    .font(.iCallout).foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var header: some View {
@@ -183,8 +281,6 @@ struct MenuPanelView: View {
 
     private var systemMetrics: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
-            Label("Sistem", systemImage: "gauge.with.dots.needle.67percent")
-                .font(.iCaption.weight(.medium)).foregroundStyle(.secondary)
             HStack(spacing: DS.Spacing.m) {
                 metric("İşlemci", "%\(Int((sys.cpu * 100).rounded()))", DS.Palette.accent)
                 metric("Bellek", sys.memUsed.formattedBytes, .primary)
