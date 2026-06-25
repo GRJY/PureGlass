@@ -1,0 +1,114 @@
+import SwiftUI
+import Foundation
+import Observation
+
+struct MaintenanceTask: Identifiable {
+    let id: String
+    let title: String
+    let detail: String
+    let symbol: String
+    let command: String
+    let needsAdmin: Bool
+}
+
+@MainActor
+@Observable
+final class MaintenanceViewModel {
+    var running: String?
+    var results: [String: Bool] = [:]   // id -> başarılı mı
+
+    let tasks: [MaintenanceTask] = [
+        .init(id: "dns", title: "DNS Önbelleğini Temizle", detail: "İnternet sitelerine bağlanma sorunlarını çözebilir.", symbol: "network", command: "dscacheutil -flushcache; killall -HUP mDNSResponder", needsAdmin: true),
+        .init(id: "spotlight", title: "Spotlight'ı Yeniden İndeksle", detail: "Arama sonuçları bozuksa indeksi sıfırlar.", symbol: "magnifyingglass", command: "mdutil -E /", needsAdmin: true),
+        .init(id: "launchservices", title: "Launch Services'i Yenile", detail: "'Birlikte Aç' menüsündeki yinelenen/yanlış uygulamaları düzeltir.", symbol: "app.badge.checkmark", command: "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user", needsAdmin: false),
+        .init(id: "periodic", title: "Periyodik Bakımı Çalıştır", detail: "macOS'un günlük/haftalık/aylık bakım betiklerini şimdi çalıştırır.", symbol: "calendar", command: "periodic daily weekly monthly", needsAdmin: true),
+        .init(id: "purge", title: "Belleği Boşalt (RAM)", detail: "Kullanılmayan belleği serbest bırakır.", symbol: "memorychip", command: "purge", needsAdmin: true),
+        .init(id: "fonts", title: "Font Önbelleğini Temizle", detail: "Font görüntüleme sorunlarını çözebilir.", symbol: "textformat", command: "atsutil databases -remove", needsAdmin: true),
+        .init(id: "dockfinder", title: "Dock & Finder'ı Yenile", detail: "Donan Dock/Finder'ı yeniden başlatır.", symbol: "macwindow", command: "killall Dock Finder", needsAdmin: false),
+    ]
+
+    func run(_ task: MaintenanceTask) async {
+        running = task.id
+        results[task.id] = nil
+        var ok = false
+        do {
+            if task.needsAdmin {
+                try AdminShell.run(task.command)        // ana iş parçacığı, parola istemi
+            } else {
+                try await Task.detached { try MaintenanceViewModel.shell(task.command) }.value
+            }
+            ok = true
+        } catch {
+            ok = false
+        }
+        results[task.id] = ok
+        running = nil
+    }
+
+    nonisolated static func shell(_ command: String) throws {
+        let p = Process()
+        p.executableURL = URL(filePath: "/bin/sh")
+        p.arguments = ["-c", command]
+        p.standardOutput = Pipe(); p.standardError = Pipe()
+        try p.run()
+        p.waitUntilExit()
+        if p.terminationStatus != 0 {
+            throw NSError(domain: "PureGlass", code: Int(p.terminationStatus))
+        }
+    }
+}
+
+struct MaintenanceView: View {
+    @State private var model = MaintenanceViewModel()
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: DS.Spacing.m) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Bakım").font(.dsDisplay(32))
+                    Text("Mac'in tipik sorunlarını çözen sistem bakım işlemleri. Bazıları yönetici parolası ister.")
+                        .font(.callout).foregroundStyle(.secondary)
+                }
+                .padding(.bottom, DS.Spacing.s)
+
+                ForEach(model.tasks) { task in
+                    taskCard(task)
+                }
+            }
+            .padding(DS.Spacing.xxl)
+            .frame(maxWidth: 760)
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    private func taskCard(_ task: MaintenanceTask) -> some View {
+        GlassCard {
+            HStack(spacing: DS.Spacing.m) {
+                Image(systemName: task.symbol).font(.title2).foregroundStyle(.tint).frame(width: 34)
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: DS.Spacing.s) {
+                        Text(task.title).font(.headline)
+                        if task.needsAdmin {
+                            Text("parola").font(.caption2).foregroundStyle(.tertiary)
+                        }
+                        if let ok = model.results[task.id] {
+                            Image(systemName: ok ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                .foregroundStyle(ok ? DS.Palette.safe : DS.Palette.danger).font(.caption)
+                        }
+                    }
+                    Text(task.detail).font(.callout).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button {
+                    Task { await model.run(task) }
+                } label: {
+                    if model.running == task.id { ProgressView().controlSize(.small) }
+                    else { Text("Çalıştır") }
+                }
+                .buttonStyle(.glass).controlSize(.large)
+                .disabled(model.running != nil)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+}

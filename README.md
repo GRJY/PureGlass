@@ -58,6 +58,15 @@ app **and** all its leftovers by bundle ID, and shows you exactly what it will r
 
 ![Uninstaller](assets/05-uninstaller.png)
 
+### 🔁 Duplicate Finder · 🧰 Maintenance · 🙈 Browser Privacy
+- **Duplicate Finder** groups files by **content hash** (SHA-256, size-pre-filtered) so renamed copies are caught;
+  keeps one, you trash the rest.
+- **Maintenance** runs the familiar OnyX-style system tasks (flush DNS, reindex Spotlight, rebuild Launch Services,
+  run periodic scripts, purge RAM, clear font cache…) — admin ones via a single password prompt.
+- **Browser Privacy** clears cache / history / cookies for Safari, Chrome, Firefox, Brave and Edge — to the Trash.
+
+![Maintenance](assets/06-maintenance.png)
+
 ---
 
 ## How PureGlass compares
@@ -79,13 +88,16 @@ app **and** all its leftovers by bundle ID, and shows you exactly what it will r
 | **Risk classification + manual control** | ✅ | partial | ✅ | ✅ | — | — |
 | **Trash-first (recoverable)** | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | **Time Machine snapshot mgmt** | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
-| Duplicate finder | 🚧 roadmap | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Maintenance scripts | 🚧 roadmap | ✅ | ✅ | ❌ | ❌ | ✅ strong |
+| **Duplicate finder** (content-hash) | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **Maintenance scripts** | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ strong |
+| **Browser privacy cleaner** | ✅ | ✅ | ✅ | ❌ | ❌ | — |
 
 **Where PureGlass leads:** the only one with **real Liquid Glass**, a **fully transparent** menu-bar panel,
 an honest **System Data breakdown** (including the undeletable part), a **full-disk treemap** (CleanMyMac has
 none), **code-signature** malware detection, and a **live per-path deletion log** — all **free, offline and
-open source**, with no telemetry.
+open source**, with no telemetry. It now also matches the paid tools on duplicate finding, maintenance scripts
+and browser-privacy cleaning. *(Universal-Binary thinning is intentionally omitted — rewriting signed app
+binaries breaks their code signature and risks breaking the app.)*
 
 ---
 
@@ -99,6 +111,9 @@ open source**, with no telemetry.
 - **Disk Map** — full-disk squarified treemap heatmap with drill-down and a quick location picker.
 - **Menu-bar panel** — a transparent Liquid Glass panel with **live disk metrics (refreshed every second)** and
   quick actions; a "System Settings → Storage" shortcut.
+- **Duplicate Finder** — content-hash (SHA-256) duplicate detection in any folder; keep one, trash the rest.
+- **Maintenance** — OnyX-style system tasks (DNS flush, Spotlight reindex, Launch Services, periodic, purge, fonts).
+- **Browser Privacy** — clear cache/history/cookies for Safari, Chrome, Firefox, Brave, Edge.
 - **Live deletion log** — every path scrolls by as it's trashed.
 - **Risk badges** everywhere (🟢 safe · 🟡 caution · 🔴 risky) and a confirmation prompt before any risky delete.
 - **Deep clean** (optional) — system caches/logs via a single admin-password prompt; system items are validated
@@ -145,7 +160,9 @@ Sources/
     ThreatScanner         persistence + malware heuristics
     DiskMapScanner / TreemapLayout   squarified treemap
     AppUninstaller        app + leftover discovery
-Tests/            69 unit tests (safety, scan, clean, signing, treemap, uninstaller…)
+    DuplicateFinder       content-hash duplicate detection
+    BrowserPrivacyScanner browser cache/history/cookie locations
+Tests/            74 unit tests (safety, scan, clean, signing, treemap, uninstaller, duplicates…)
 ```
 
 ## Safety & Privacy
@@ -164,7 +181,7 @@ Tests/            69 unit tests (safety, scan, clean, signing, treemap, uninstal
 
 ## Roadmap
 
-- Duplicate finder · Maintenance scripts · Universal Binary thinning · Browser privacy cleaner · English/i18n.
+- English / multi-language localization · simulator-runtime cleanup via `simctl` · scheduled background scans.
 
 ## License
 

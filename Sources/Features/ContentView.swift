@@ -5,8 +5,11 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
     case smartScan
     case systemData
     case security
+    case privacy
     case uninstaller
+    case duplicates
     case spaceLens
+    case maintenance
     case settings
 
     var id: String { rawValue }
@@ -16,8 +19,11 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
         case .smartScan: "Akıllı Tarama"
         case .systemData: "Sistem Verileri"
         case .security: "Güvenlik Taraması"
+        case .privacy: "Tarayıcı Gizliliği"
         case .uninstaller: "Uygulama Kaldırıcı"
+        case .duplicates: "Yinelenen Dosyalar"
         case .spaceLens: "Disk Haritası"
+        case .maintenance: "Bakım"
         case .settings: "Ayarlar"
         }
     }
@@ -27,8 +33,11 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
         case .smartScan: "sparkles"
         case .systemData: "macwindow.on.rectangle"
         case .security: "shield.lefthalf.filled"
+        case .privacy: "hand.raised"
         case .uninstaller: "trash.square"
+        case .duplicates: "doc.on.doc"
         case .spaceLens: "chart.pie"
+        case .maintenance: "wrench.and.screwdriver"
         case .settings: "gearshape"
         }
     }
@@ -71,6 +80,12 @@ struct ContentView: View {
             SystemDataView()
         case .security:
             SecurityView()
+        case .privacy:
+            PrivacyView()
+        case .duplicates:
+            DuplicateView()
+        case .maintenance:
+            MaintenanceView()
         case .settings:
             SettingsView(model: model)
         case .spaceLens:
