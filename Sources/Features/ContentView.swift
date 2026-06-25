@@ -5,6 +5,7 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
     case smartScan
     case systemData
     case monitor
+    case network
     case security
     case privacy
     case uninstaller
@@ -20,6 +21,7 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
         case .smartScan: L("Akıllı Tarama", "Smart Scan")
         case .systemData: L("Sistem Verileri", "System Data")
         case .monitor: L("Sistem Monitörü", "System Monitor")
+        case .network: L("Ağ", "Network")
         case .security: L("Güvenlik Taraması", "Security Scan")
         case .privacy: L("Tarayıcı Gizliliği", "Browser Privacy")
         case .uninstaller: L("Uygulama Kaldırıcı", "App Uninstaller")
@@ -35,6 +37,7 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
         case .smartScan: "sparkles"
         case .systemData: "macwindow.on.rectangle"
         case .monitor: "gauge.with.dots.needle.67percent"
+        case .network: "wifi"
         case .security: "shield.lefthalf.filled"
         case .privacy: "hand.raised"
         case .uninstaller: "trash.square"
@@ -103,6 +106,8 @@ struct ContentView: View {
             SystemDataView()
         case .monitor:
             SystemMonitorView()
+        case .network:
+            NetworkView()
         case .security:
             SecurityView()
         case .privacy:
