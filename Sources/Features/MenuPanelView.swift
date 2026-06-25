@@ -117,16 +117,13 @@ struct MenuPanelView: View {
     @State private var disk = DiskMonitor()
     @State private var sys = PanelMetrics()
     @State private var tab: PanelTab = .cleaning
+    @Namespace private var tabNS
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.m) {
             header
 
-            Picker("", selection: $tab) {
-                ForEach(PanelTab.allCases) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
+            tabBar
 
             Group {
                 switch tab {
@@ -146,6 +143,32 @@ struct MenuPanelView: View {
         .padding(10)
         .task { disk.start(); sys.start() }
         .onDisappear { disk.stop(); sys.stop() }
+    }
+
+    // MARK: - Sekme barı (ortalı, kutusuz, animasyonlu mavi alt çizgi)
+
+    private var tabBar: some View {
+        HStack(spacing: DS.Spacing.l) {
+            ForEach(PanelTab.allCases) { t in
+                VStack(spacing: 5) {
+                    Text(t.title)
+                        .font(.iCallout.weight(tab == t ? .semibold : .regular))
+                        .foregroundStyle(tab == t ? DS.Palette.accent : Color.secondary)
+                    ZStack {
+                        Capsule().fill(.clear).frame(height: 2.5)
+                        if tab == t {
+                            Capsule().fill(DS.Palette.accent).frame(height: 2.5)
+                                .matchedGeometryEffect(id: "tabUnderline", in: tabNS)
+                        }
+                    }
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(.spring(response: 0.32, dampingFraction: 0.72)) { tab = t }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 
     // MARK: - Sekmeler
