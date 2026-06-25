@@ -3,6 +3,7 @@ import SwiftUI
 /// Kenar çubuğu hedefleri.
 enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
     case smartScan
+    case security
     case uninstaller
     case spaceLens
     case settings
@@ -12,6 +13,7 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
     var title: String {
         switch self {
         case .smartScan: "Akıllı Tarama"
+        case .security: "Güvenlik Taraması"
         case .uninstaller: "Uygulama Kaldırıcı"
         case .spaceLens: "Disk Haritası"
         case .settings: "Ayarlar"
@@ -21,6 +23,7 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
     var symbol: String {
         switch self {
         case .smartScan: "sparkles"
+        case .security: "shield.lefthalf.filled"
         case .uninstaller: "trash.square"
         case .spaceLens: "chart.pie"
         case .settings: "gearshape"
@@ -60,6 +63,8 @@ struct ContentView: View {
         switch model.selectedSection ?? .smartScan {
         case .smartScan:
             SmartScanView(model: model)
+        case .security:
+            SecurityView()
         case .settings:
             SettingsView(model: model)
         case .spaceLens:
