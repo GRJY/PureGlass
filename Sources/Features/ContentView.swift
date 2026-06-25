@@ -82,11 +82,11 @@ struct ContentView: View {
                 .background(VisualEffectView(material: .fullScreenUI).ignoresSafeArea())
                 .overlay(alignment: .topTrailing) {
                     LanguageToggle()
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
                         .glassEffect(.regular, in: .capsule)
-                        .padding(.trailing, 16)
-                        .padding(.top, 12)
+                        .padding(.trailing, 10)
+                        .padding(.top, 8)
                 }
         }
         .task {

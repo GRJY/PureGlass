@@ -186,7 +186,7 @@ struct SystemDataView: View {
                     Label(L("Time Machine Anlık Görüntüleri", "Time Machine Snapshots"), systemImage: "clock.arrow.2.circlepath")
                         .font(.dsTitle)
                     Spacer()
-                    Text("\(model.snapshotCount) adet")
+                    Text(L("\(model.snapshotCount) adet", "\(model.snapshotCount) items"))
                         .font(.iCaption.weight(.semibold))
                         .foregroundStyle(model.snapshotCount > 0 ? DS.Palette.caution : DS.Palette.safe)
                 }
@@ -240,7 +240,7 @@ struct SystemDataView: View {
             ProgressRing(progress: model.progress, size: 140)
             Text(L("Sistem verileri taranıyor…", "Scanning system data…")).font(.dsTitle)
             Text(model.statusText).font(.iCallout).foregroundStyle(.secondary).lineLimit(1)
-            Text("\(model.bytesFound.formattedBytes) bulundu").font(.iHeadline.monospacedDigit()).foregroundStyle(.tint)
+            Text(L("\(model.bytesFound.formattedBytes) bulundu", "\(model.bytesFound.formattedBytes) found")).font(.iHeadline.monospacedDigit()).foregroundStyle(.tint)
         }
         .padding(DS.Spacing.xxl)
     }
@@ -292,7 +292,7 @@ struct SystemDataView: View {
             HStack(spacing: DS.Spacing.s) {
                 Image(systemName: "lock.shield").foregroundStyle(.secondary)
                 Text(L("Silinemez Sistem Verileri", "Undeletable System Data")).font(.iHeadline)
-                Text("macOS gerektirir").font(.iCaption2).foregroundStyle(.tertiary)
+                Text(L("macOS gerektirir", "Requires macOS")).font(.iCaption2).foregroundStyle(.tertiary)
                 Spacer()
                 if model.protectedTotal > 0 {
                     Text(model.protectedTotal.formattedBytes).font(.iSubheadline.weight(.semibold)).foregroundStyle(.secondary)
@@ -367,7 +367,7 @@ struct SystemDataView: View {
                     StatTile(title: L("Geri kazanılan", "Reclaimed"), value: r.bytesReclaimed.formattedBytes, systemImage: "internaldrive", tint: DS.Palette.safe)
                     StatTile(title: L("Çöp'e taşınan", "Moved to Trash"), value: "\(r.trashedCount)", systemImage: "trash")
                     if r.skippedCount + r.failedCount > 0 {
-                        StatTile(title: "Atlanan/Hata", value: "\(r.skippedCount + r.failedCount)", systemImage: "exclamationmark.triangle", tint: DS.Palette.caution)
+                        StatTile(title: L("Atlanan/Hata", "Skipped/Error"), value: "\(r.skippedCount + r.failedCount)", systemImage: "exclamationmark.triangle", tint: DS.Palette.caution)
                     }
                 }.frame(maxWidth: 640)
             }

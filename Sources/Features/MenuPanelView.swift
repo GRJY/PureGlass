@@ -103,8 +103,8 @@ final class DiskMonitor {
 enum PanelTab: String, CaseIterable, Identifiable {
     case cleaning, system, fan
     var id: String { rawValue }
-    var title: String {
-        switch self { case .cleaning: "Temizlik"; case .system: "Sistem"; case .fan: "Fan" }
+    @MainActor var title: String {
+        switch self { case .cleaning: L("Temizlik", "Cleanup"); case .system: L("Sistem", "System"); case .fan: "Fan" }
     }
 }
 
@@ -208,7 +208,7 @@ struct MenuPanelView: View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
             meterRow(L("İşlemci", "Processor"), "cpu", "%\(Int((sys.cpu * 100).rounded()))",
                      fraction: sys.cpu, tint: DS.Palette.accent, valueColor: DS.Palette.accent)
-            meterRow("Bellek", "memorychip", sys.memUsed.formattedBytes,
+            meterRow(L("Bellek", "Memory"), "memorychip", sys.memUsed.formattedBytes,
                      fraction: sys.memFraction,
                      tint: sys.memFraction > 0.9 ? DS.Palette.danger : DS.Palette.safe, valueColor: .primary)
             meterRow(L("Sıcaklık", "Temperature"), "thermometer.medium", sys.temp.map { "\(Int($0.rounded()))°" } ?? "—",
@@ -263,7 +263,7 @@ struct MenuPanelView: View {
                     Text("\(Int(sys.fanTarget)) RPM").font(.iCallout.weight(.semibold).monospacedDigit()).contentTransition(.numericText())
                     HStack(spacing: DS.Spacing.s) {
                         Button { Task { await sys.applyManualFan() } } label: {
-                            Label("Uygula", systemImage: "wind")
+                            Label(L("Uygula", "Apply"), systemImage: "wind")
                         }
                         .buttonStyle(.borderedProminent).controlSize(.small).disabled(sys.fanBusy)
                         Button(L("Normale Dön", "Reset to Auto")) { Task { await sys.setAutoFan() } }
@@ -307,7 +307,7 @@ struct MenuPanelView: View {
     private var diskMetrics: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
             HStack {
-                Label("Depolama", systemImage: "internaldrive")
+                Label(L("Depolama", "Storage"), systemImage: "internaldrive")
                     .font(.iCaption.weight(.medium)).foregroundStyle(.secondary)
                 Spacer()
                 Button {

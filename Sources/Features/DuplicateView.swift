@@ -78,7 +78,7 @@ struct DuplicateView: View {
             Button { model.pickFolder() } label: { Label(model.root.lastPathComponent, systemImage: "folder") }
                 .buttonStyle(.glass).controlSize(.small)
             Button { Task { await model.scan() } } label: {
-                Label("Tara", systemImage: "magnifyingglass")
+                Label(L("Tara", "Scan"), systemImage: "magnifyingglass")
             }.buttonStyle(.glassProminent).tint(.accentColor).controlSize(.small)
         }
         .padding(DS.Spacing.m)
@@ -109,7 +109,7 @@ struct DuplicateView: View {
                             }
                         } header: {
                             HStack {
-                                Text("\(group.urls.count) kopya").font(.iHeadline)
+                                Text(L("\(group.urls.count) kopya", "\(group.urls.count) copies")).font(.iHeadline)
                                 Spacer()
                                 Text(L("\(group.wastedBytes.formattedBytes) boşa", "\(group.wastedBytes.formattedBytes) wasted")).font(.iSubheadline.weight(.semibold)).foregroundStyle(DS.Palette.caution)
                             }
@@ -129,7 +129,7 @@ struct DuplicateView: View {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: DS.Spacing.s) {
                     Text(url.lastPathComponent).font(.iCallout).lineLimit(1)
-                    if isFirst { Text("tutulacak").font(.iCaption2).foregroundStyle(DS.Palette.safe) }
+                    if isFirst { Text(L("tutulacak", "kept")).font(.iCaption2).foregroundStyle(DS.Palette.safe) }
                 }
                 Text(url.path).font(.dsMono).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
             }

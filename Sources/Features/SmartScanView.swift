@@ -94,7 +94,7 @@ struct SmartScanView: View {
                 .font(.iCallout)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
-            Text("\(model.scanBytesFound.formattedBytes) bulundu")
+            Text(L("\(model.scanBytesFound.formattedBytes) bulundu", "\(model.scanBytesFound.formattedBytes) found"))
                 .font(.iHeadline.monospacedDigit())
                 .foregroundStyle(.tint)
                 .contentTransition(.numericText())
@@ -281,7 +281,7 @@ struct SmartScanView: View {
                     StatTile(title: L("Çöp'e taşınan", "Moved to Trash"), value: "\(report.trashedCount)",
                              systemImage: "trash")
                     if report.skippedCount + report.failedCount > 0 {
-                        StatTile(title: "Atlanan/Hata", value: "\(report.skippedCount + report.failedCount)",
+                        StatTile(title: L("Atlanan/Hata", "Skipped/Error"), value: "\(report.skippedCount + report.failedCount)",
                                  systemImage: "exclamationmark.triangle", tint: DS.Palette.caution)
                     }
                 }
@@ -320,7 +320,7 @@ struct SettingsView: View {
                 FullDiskAccessCard(coordinator: model.permissions)
                 GlassCard {
                     VStack(alignment: .leading, spacing: DS.Spacing.s) {
-                        Label("Gizlilik", systemImage: "hand.raised")
+                        Label(L("Gizlilik", "Privacy"), systemImage: "hand.raised")
                             .font(.dsTitle)
                         Text(L("PureGlass tamamen lokalde çalışır. Hiçbir veri internete gönderilmez, telemetri yoktur. Tüm silmeler Çöp Kutusu'na taşınır (geri alınabilir).", "PureGlass runs entirely locally. No data is sent to the internet, no telemetry. All deletions go to the Trash (recoverable)."))
                             .font(.iCallout)

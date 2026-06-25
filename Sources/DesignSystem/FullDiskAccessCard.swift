@@ -32,7 +32,7 @@ struct FullDiskAccessCard: View {
                         .tint(.accentColor)
 
                         Button { coordinator.refresh() } label: {
-                            Label("Yeniden Denetle", systemImage: "arrow.clockwise")
+                            Label(L("Yeniden Denetle", "Re-check"), systemImage: "arrow.clockwise")
                                 .padding(.horizontal, DS.Spacing.s)
                         }
                         .buttonStyle(.glass)
@@ -57,9 +57,9 @@ struct FullDiskAccessCard: View {
 
     private var statusTitle: String {
         switch coordinator.status {
-        case .granted: "Verildi"
-        case .denied: "Verilmedi"
-        case .unknown: "Bilinmiyor"
+        case .granted: L("Verildi", "Granted")
+        case .denied: L("Verilmedi", "Not granted")
+        case .unknown: L("Bilinmiyor", "Unknown")
         }
     }
 

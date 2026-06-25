@@ -40,7 +40,7 @@ struct SpaceLensView: View {
             Button(L("Konteynerler", "Containers"), systemImage: "shippingbox") { setRoot(home.appending(path: "Library/Containers")) }
             Button("/Library", systemImage: "building.columns") { setRoot(URL(filePath: "/Library")) }
         } label: {
-            Label("Konum", systemImage: "folder.badge.gearshape")
+            Label(L("Konum", "Location"), systemImage: "folder.badge.gearshape")
         }
         .menuStyle(.borderlessButton)
         .fixedSize()

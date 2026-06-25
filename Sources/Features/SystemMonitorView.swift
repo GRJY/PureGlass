@@ -128,7 +128,7 @@ struct SystemMonitorView: View {
                 cpuHistoryChart
 
                 HStack(spacing: DS.Spacing.l) {
-                    cpuLegend("Sistem", model.cpuSystem, DS.Palette.danger)
+                    cpuLegend(L("Sistem", "System"), model.cpuSystem, DS.Palette.danger)
                     cpuLegend(L("Kullanıcı", "User"), model.cpuUser, DS.Palette.accent)
                     cpuLegend(L("Boş", "Free"), 1 - model.cpuTotal, .secondary)
                 }
@@ -185,7 +185,7 @@ struct SystemMonitorView: View {
     private var memoryCard: some View {
         GlassCard(fill: true) {
             VStack(alignment: .leading, spacing: DS.Spacing.s) {
-                cardHeader("Bellek (RAM)", "memorychip", DS.Palette.safe)
+                cardHeader(L("Bellek (RAM)", "Memory (RAM)"), "memorychip", DS.Palette.safe)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(model.memory.used.formattedBytes).font(.dsDisplay(30)).monospacedDigit()
                     Text("/ \(model.memory.total.formattedBytes)").font(.iCallout).foregroundStyle(.secondary)
@@ -222,7 +222,7 @@ struct SystemMonitorView: View {
                 Divider().opacity(0.2)
                 tempRow(L("CPU bölgesi", "CPU area"), model.cpuTemp)
                 tempRow(L("En sıcak sensör", "Hottest sensor"), model.peakTemp)
-                tempRow("Batarya", model.batteryTemp)
+                tempRow(L("Batarya", "Battery"), model.batteryTemp)
                 if !model.hasSMC {
                     Text(L("Sıcaklık sensörlerine erişilemiyor.", "Temperature sensors are unavailable.")).font(.iCaption2).foregroundStyle(.tertiary)
                 }
@@ -282,7 +282,7 @@ struct SystemMonitorView: View {
                 .contentTransition(.numericText())
             HStack(spacing: DS.Spacing.s) {
                 Button { Task { await model.applyManualFan() } } label: {
-                    Label("Uygula", systemImage: "wind").padding(.horizontal, 4)
+                    Label(L("Uygula", "Apply"), systemImage: "wind").padding(.horizontal, 4)
                 }
                 .buttonStyle(.glassProminent).tint(.accentColor).disabled(model.fanBusy)
                 Button(L("Normale Dön", "Reset to Auto")) { Task { await model.setAutoFan() } }

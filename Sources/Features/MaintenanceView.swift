@@ -99,7 +99,7 @@ struct MaintenanceView: View {
                     HStack(spacing: DS.Spacing.s) {
                         Text(task.title).font(.iHeadline)
                         if task.needsAdmin {
-                            Text("parola").font(.iCaption2).foregroundStyle(.tertiary)
+                            Text(L("parola", "password")).font(.iCaption2).foregroundStyle(.tertiary)
                         }
                         if let ok = model.results[task.id] {
                             Image(systemName: ok ? "checkmark.circle.fill" : "xmark.circle.fill")

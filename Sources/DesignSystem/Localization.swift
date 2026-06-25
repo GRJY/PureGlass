@@ -37,9 +37,9 @@ struct LanguageToggle: View {
     @Bindable private var loc = Loc.shared
 
     var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 4) {
             segment(.tr, "TR")
-            Text("/").foregroundStyle(.tertiary).font(.iCaption2)
+            Text("/").foregroundStyle(.tertiary).font(.system(size: 14))
             segment(.en, "EN")
         }
     }
@@ -49,7 +49,7 @@ struct LanguageToggle: View {
             withAnimation(.easeInOut(duration: 0.15)) { loc.lang = l }
         } label: {
             Text(title)
-                .font(.iCaption.weight(loc.lang == l ? .bold : .regular))
+                .font(.system(size: 15, weight: loc.lang == l ? .bold : .medium))
                 .foregroundStyle(loc.lang == l ? DS.Palette.accent : Color.secondary)
         }
         .buttonStyle(.plain)
