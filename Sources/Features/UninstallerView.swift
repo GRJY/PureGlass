@@ -77,8 +77,9 @@ struct UninstallerView: View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Uygulama Kaldırıcı").font(.dsTitle)
-                Text("Uygulamayı tüm artıklarıyla (cache, ayar, container, log) birlikte kaldırır.")
+                Text("Bir uygulamayı çöpe atmak yetmez; geride ayar ve veri dosyaları kalır. Burası uygulamayı bu artıklarıyla birlikte eksiksiz kaldırır — önce neyi sileceğini sana gösterir.")
                     .font(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Spacer()
             if let msg = model.resultMessage {

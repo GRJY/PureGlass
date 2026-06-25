@@ -136,7 +136,7 @@ struct SystemDataView: View {
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(model.snapshotCount > 0 ? DS.Palette.caution : DS.Palette.safe)
                 }
-                Text("Bunlar DOSYA DEĞİL, APFS anlık görüntüleridir — \"Sistem Verileri\"nin çoğunu bunlar oluşturabilir (dosya taramasında görünmez). macOS 24 saatte bir otomatik siler; istersen şimdi silebilirsin. Boş alan olarak sayılırlar, silmek güvenlidir.")
+                Text("Time Machine'in Mac'ine geçici olarak kaydettiği yedek kopyalar. Genellikle \"Sistem Verileri\"nin en büyük parçasıdır ama normal dosya gibi görünmedikleri için listede çıkmazlar. macOS bunları 24 saat içinde kendisi siler; istersen şimdi temizleyebilirsin — tamamen güvenlidir, zaten boş alan olarak sayılırlar.")
                     .font(.callout).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 if model.snapshotCount > 0 {
@@ -160,7 +160,7 @@ struct SystemDataView: View {
                 Image(systemName: "macwindow.on.rectangle")
                     .font(.system(size: 58, weight: .light)).symbolRenderingMode(.hierarchical).foregroundStyle(.tint)
                 Text("Sistem Verileri").font(.dsDisplay(38))
-                Text("macOS'un \"Sistem Verileri\" kategorisini oluşturan dosyaları döker:\nönbellek, konteynerler, uygulama verileri, iOS yedekleri, geliştirici dosyaları…\nHer öğe risk rozetiyle gelir; HİÇBİRİ önceden seçili değildir — sen seçersin.")
+                Text("Mac'inin Depolama ekranında gördüğün, onlarca GB yer kaplayan o gizemli \"Sistem Verileri\"nin içinde tam olarak ne var — gösterir.\nUygulama verileri, önbellekler, iOS yedekleri, geliştirici dosyaları…\n\nHer öğenin yanında renkli bir güvenlik rozeti vardır. Hiçbiri otomatik seçilmez; neyi sileceğine sen karar verirsin.")
                     .font(.headline).foregroundStyle(.secondary).multilineTextAlignment(.center)
                 GlassCard {
                     HStack(spacing: DS.Spacing.m) {

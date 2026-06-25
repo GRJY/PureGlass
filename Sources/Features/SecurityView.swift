@@ -61,7 +61,7 @@ struct SecurityView: View {
                     .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(.tint)
                 Text("Güvenlik Taraması").font(.dsDisplay(36))
-                Text("Kalıcılık konumlarını (launch agent/daemon, ~/.zshrc, cron, emond, hosts) tarar ve her öğenin KOD İMZASINI doğrular (KnockKnock yaklaşımı). Apple/Developer-ID imzalı öğeler güvenilir sayılır; imzasız/ad-hoc/bozuk imzalı kalıcı öğeler işaretlenir. Lokalde çalışır; bulut antivirüs değildir.")
+                Text("Mac'ine zararlı yazılım bulaşmış mı diye kontrol eder.\nAçılışta arka planda kendini çalıştıran gizli programları bulur, her birinin Apple onaylı (güvenli) olup olmadığını denetler ve şüphelileri işaretler.\n\nHer şey cihazında kalır — internete hiçbir veri gönderilmez.")
                     .font(.callout).foregroundStyle(.secondary)
                     .multilineTextAlignment(.center).frame(maxWidth: 560)
                 Button { Task { await model.scan() } } label: {
