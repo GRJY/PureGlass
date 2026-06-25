@@ -1,6 +1,43 @@
 import SwiftUI
 import AppKit
 import Observation
+import PureGlassKit
+
+/// Menü panelinin canlı sistem metrikleri (CPU/Bellek/Sıcaklık/Fan), 1 sn'de bir.
+@MainActor
+@Observable
+final class PanelMetrics {
+    private let cpuSampler = CPUUsageSampler()
+    private let smc = SMCReader()
+
+    var cpu: Double = 0
+    var memUsed: Int64 = 0
+    var memFraction: Double = 0
+    var temp: Double?
+    var fan: Double?
+
+    private var task: Task<Void, Never>?
+
+    func start() {
+        guard task == nil else { return }
+        _ = cpuSampler.sample()
+        task = Task { [weak self] in
+            while !Task.isCancelled {
+                self?.refresh()
+                try? await Task.sleep(for: .seconds(1))
+            }
+        }
+    }
+    func stop() { task?.cancel(); task = nil }
+
+    private func refresh() {
+        cpu = cpuSampler.sample().total
+        let m = SystemMetrics.memory()
+        memUsed = m.used; memFraction = m.usedFraction
+        temp = smc?.cpuTemperature()
+        fan = smc?.fan()?.current
+    }
+}
 
 /// Diski arka planda 5 sn'de bir sorgulayan canlı disk gözlemcisi.
 @MainActor
@@ -50,11 +87,15 @@ struct MenuPanelView: View {
     var onOpenMain: () -> Void = {}
 
     @State private var disk = DiskMonitor()
+    @State private var sys = PanelMetrics()
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.m) {
             header
             diskMetrics
+            Divider().opacity(0.3)
+            systemMetrics
+            Divider().opacity(0.3)
             VStack(spacing: 2) {
                 row("Hızlı Tarama", "magnifyingglass") {
                     model.selectedSection = .smartScan
@@ -63,6 +104,10 @@ struct MenuPanelView: View {
                 }
                 row("Güvenlik Taraması", "shield.lefthalf.filled") {
                     model.selectedSection = .security
+                    onOpenMain()
+                }
+                row("Sistem Monitörü", "gauge.with.dots.needle.67percent") {
+                    model.selectedSection = .monitor
                     onOpenMain()
                 }
                 row("Disk Haritası", "chart.pie") {
@@ -81,7 +126,8 @@ struct MenuPanelView: View {
         .frame(width: 320)
         .glassEffect(.regular, in: .rect(cornerRadius: 22))
         .padding(10)
-        .task { disk.start() }
+        .task { disk.start(); sys.start() }
+        .onDisappear { disk.stop(); sys.stop() }
     }
 
     private var header: some View {
@@ -133,10 +179,33 @@ struct MenuPanelView: View {
         }
     }
 
+    // MARK: - Canlı sistem metrikleri (CPU/Bellek/Sıcaklık/Fan)
+
+    private var systemMetrics: some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.s) {
+            Label("Sistem", systemImage: "gauge.with.dots.needle.67percent")
+                .font(.iCaption.weight(.medium)).foregroundStyle(.secondary)
+            HStack(spacing: DS.Spacing.m) {
+                metric("İşlemci", "%\(Int((sys.cpu * 100).rounded()))", DS.Palette.accent)
+                metric("Bellek", sys.memUsed.formattedBytes, .primary)
+                metric("Sıcaklık", sys.temp.map { "\(Int($0.rounded()))°" } ?? "—", tempColor(sys.temp))
+                metric("Fan", sys.fan.map { "\(Int($0))" } ?? "—", .primary)
+            }
+        }
+    }
+
+    private func tempColor(_ t: Double?) -> Color {
+        guard let t else { return .secondary }
+        return t < 55 ? DS.Palette.safe : t < 75 ? DS.Palette.caution : DS.Palette.danger
+    }
+
     private func metric(_ title: String, _ value: String, _ color: Color) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(title).font(.iCaption2).foregroundStyle(.secondary)
-            Text(value).font(.iCallout.weight(.semibold).monospacedDigit()).foregroundStyle(color)
+            Text(value).font(.iCallout.weight(.semibold).monospacedDigit())
+                .foregroundStyle(color)
+                .lineLimit(1).minimumScaleFactor(0.65)
+                .contentTransition(.numericText())
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -156,15 +225,16 @@ struct MenuPanelView: View {
     private func row(_ title: String, _ symbol: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: DS.Spacing.s) {
-                Image(systemName: symbol).frame(width: 22)
+                Image(systemName: symbol).frame(width: 20, alignment: .leading)
                 Text(title)
                 Spacer()
             }
-            .padding(.vertical, 6)
+            .padding(.vertical, 7)
             .padding(.horizontal, DS.Spacing.s)
             .contentShape(Rectangle())
         }
         .buttonStyle(MenuRowStyle())
+        .padding(.horizontal, -DS.Spacing.s)   // içerik kenarla aynı hizada; vurgu hafif taşar
     }
 
     private func openStorageSettings() {
