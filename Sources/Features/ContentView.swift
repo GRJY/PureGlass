@@ -4,6 +4,7 @@ import SwiftUI
 enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
     case smartScan
     case systemData
+    case monitor
     case security
     case privacy
     case uninstaller
@@ -18,6 +19,7 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .smartScan: "Akıllı Tarama"
         case .systemData: "Sistem Verileri"
+        case .monitor: "Sistem Monitörü"
         case .security: "Güvenlik Taraması"
         case .privacy: "Tarayıcı Gizliliği"
         case .uninstaller: "Uygulama Kaldırıcı"
@@ -32,6 +34,7 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .smartScan: "sparkles"
         case .systemData: "macwindow.on.rectangle"
+        case .monitor: "gauge.with.dots.needle.67percent"
         case .security: "shield.lefthalf.filled"
         case .privacy: "hand.raised"
         case .uninstaller: "trash.square"
@@ -78,6 +81,8 @@ struct ContentView: View {
             SmartScanView(model: model)
         case .systemData:
             SystemDataView()
+        case .monitor:
+            SystemMonitorView()
         case .security:
             SecurityView()
         case .privacy:

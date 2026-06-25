@@ -58,6 +58,13 @@ app **and** all its leftovers by bundle ID, and shows you exactly what it will r
 
 ![Uninstaller](assets/05-uninstaller.png)
 
+### 📊 System Monitor — live CPU, memory, temperature & fan
+Reads directly from the **SMC** (System Management Controller) and Mach APIs: live CPU usage
+(with per-core bars), memory pressure, **thermal state**, CPU/battery **temperature** and **fan RPM**
+— refreshed every second. No root required.
+
+![System Monitor](assets/08-system-monitor.png)
+
 ### 🔁 Duplicate Finder · 🧰 Maintenance · 🙈 Browser Privacy
 - **Duplicate Finder** groups files by **content hash** (SHA-256, size-pre-filtered) so renamed copies are caught;
   keeps one, you trash the rest.
@@ -78,6 +85,7 @@ app **and** all its leftovers by bundle ID, and shows you exactly what it will r
 | **Telemetry** | ✅ **None** | ⚠️ Yes | None | None | None | None |
 | **Real Liquid Glass UI** (macOS 26) | ✅ **Only PureGlass** | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Transparent menu-bar panel + live disk** | ✅ | menu only | ✅ | ❌ | ❌ | ❌ |
+| **Live system monitor** (CPU/temp/fan, SMC) | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | **Smart Scan (one-click)** | ✅ | ✅ | ✅ | ❌ | partial | ❌ |
 | **System Junk** | ✅ | ✅ | ✅ | — | ✅ | limited |
 | **System Data breakdown + undeletable sizes** | ✅ **Unique** | ❌ | ❌ | ❌ | ❌ | ❌ |
@@ -114,6 +122,7 @@ binaries breaks their code signature and risks breaking the app.)*
 - **Duplicate Finder** — content-hash (SHA-256) duplicate detection in any folder; keep one, trash the rest.
 - **Maintenance** — OnyX-style system tasks (DNS flush, Spotlight reindex, Launch Services, periodic, purge, fonts).
 - **Browser Privacy** — clear cache/history/cookies for Safari, Chrome, Firefox, Brave, Edge.
+- **System Monitor** — live CPU (per-core), memory pressure, thermal state, CPU/battery temperature and fan RPM, read from the SMC + Mach APIs every second. No root.
 - **Live deletion log** — every path scrolls by as it's trashed.
 - **Risk badges** everywhere (🟢 safe · 🟡 caution · 🔴 risky) and a confirmation prompt before any risky delete.
 - **Deep clean** (optional) — system caches/logs via a single admin-password prompt; system items are validated
@@ -162,7 +171,9 @@ Sources/
     AppUninstaller        app + leftover discovery
     DuplicateFinder       content-hash duplicate detection
     BrowserPrivacyScanner browser cache/history/cookie locations
-Tests/            74 unit tests (safety, scan, clean, signing, treemap, uninstaller, duplicates…)
+    SMCReader             SMC sensor reads (temperature, fan) via raw IOKit
+    SystemMetrics         CPU usage + memory via Mach APIs
+Tests/            79 unit tests (safety, scan, clean, signing, treemap, duplicates, SMC, metrics…)
 ```
 
 ## Safety & Privacy
@@ -181,7 +192,7 @@ Tests/            74 unit tests (safety, scan, clean, signing, treemap, uninstal
 
 ## Roadmap
 
-- English / multi-language localization · simulator-runtime cleanup via `simctl` · scheduled background scans.
+- **Fan control** (manual RPM, M1/M2 only — Apple blocks it on M3+) · English/i18n · simulator-runtime cleanup via `simctl`.
 
 ## License
 
