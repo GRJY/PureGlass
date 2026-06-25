@@ -1,107 +1,175 @@
-# PureGlass
+<div align="center">
 
-Native, **şeffaf (Liquid Glass)**, gizliliğe saygılı bir macOS disk temizleyici.
-CleanMyMac mantığını taban alır ama **tamamen senin kontrolünde, lokalde** çalışır:
-hiçbir veri internete gitmez, telemetri yoktur ve **her silinen dosyanın tam yolunu** görürsün.
+# ✨ PureGlass
 
-> **Neden?** Dışarıdaki ücretli temizleyicilerin maliyetinden ve veri gizliliği riskinden
-> kaçınmak; 256 GB diski maksimum verimle kullanmak.
+### The native, **real Liquid Glass** Mac cleaner — free, private, and open source.
+
+PureGlass finds what wastes your space, shows you **every single file path** before touching it,
+and never sends a byte to the internet. Built from scratch in SwiftUI for **macOS 26 (Tahoe)** with
+Apple's genuine **Liquid Glass** material — not a glassmorphism fake.
+
+![Smart Scan](assets/01-smart-scan.png)
+
+</div>
 
 ---
 
-## Özellikler
+## Why PureGlass?
 
-- **Akıllı Tarama** — önbellek, günlük, geçici dosya ve geliştirici artıklarını (Xcode DerivedData, npm, vb.) tarar.
-- **Her dosya yolu görünür** — silmeden önce tam yol + boyut + risk rozeti (yeşil/sarı/kırmızı) ile listelenir.
-- **Canlı silme logu** — her dosya Çöp'e taşınırken yolu anlık akar.
-- **Trash-first** — kullanıcı dosyaları kalıcı silinmez; geri alınabilir Çöp Kutusu'na gider.
-- **Derin Sistem Temizliği** (opsiyonel) — sistem önbellek/günlüklerini de temizler; tek
-  yönetici parolası istemiyle, ayrı ve daha katı bir güvenlik kapısından geçerek.
-- **Disk Haritası** — disk kullanımının squarified treemap görselleştirmesi; klasöre
-  tıklayıp içine inerek (drill-down) hangi klasörün ne kadar yer kapladığını gör.
-- **Şeffaf Liquid Glass arayüz** — macOS 26 (Tahoe) cam efektleri.
-- **Tam offline** — telemetri/ağ erişimi yok.
+Most Mac cleaners are either **expensive** (CleanMyMac is $39.95/yr), **closed-source with telemetry**, or
+**CLI-only**. PureGlass was built on three principles:
 
-## Gereksinimler
+- 🔒 **Privacy first** — 100% offline. No telemetry, no accounts, no network access. Ever.
+- 🪟 **Real Liquid Glass** — the genuine macOS 26 `.glassEffect()` material + a fully transparent menu-bar panel.
+- 👁️ **Total transparency** — you see the **exact path, size and risk level** of everything before it's removed,
+  and every deletion goes to the **Trash** (recoverable), shown live as it happens.
 
-- macOS **26.0+** (Tahoe) — Liquid Glass için
+> **Honest by design.** PureGlass tells you the truth: which files are safe, which are risky, and which system
+> data simply **cannot** be deleted by *any* tool (it shows you those too, with their sizes).
+
+---
+
+## Screenshots
+
+### 🗂️ System Data — finally, what's *actually* inside it
+macOS hides tens of GB under a mysterious "System Data" category. PureGlass breaks it down by **risk level**
+(🟢 safe · 🟡 caution · 🔴 risky), pre-selects **nothing** (you choose), and even shows the
+**undeletable** system areas with their real sizes.
+
+![System Data](assets/02-system-data.png)
+
+### 🛡️ Security Scan — code-signature malware detection
+Uses the **KnockKnock methodology**: enumerates persistence locations (launch agents/daemons, `~/.zshrc`,
+cron, emond, hosts) and verifies the **code signature** of every persistent executable. Apple/Developer-ID
+signed items are trusted; unsigned / ad-hoc / broken-signed items are flagged. 100% local.
+
+![Security Scan](assets/03-security.png)
+
+### 🗺️ Disk Map — full-disk heatmap treemap
+A squarified treemap where **box size = disk usage** and **color = how full** (🔴 huge → 🟢 small).
+Click any folder to drill in. A location picker jumps to the whole disk (`/`), Homebrew, `/Library/Developer`,
+and more — so you can actually find the 60 GB hiding in your Xcode simulators. *(CleanMyMac has no treemap.)*
+
+![Disk Map](assets/04-disk-map.png)
+
+### 🧹 App Uninstaller — with leftover detection
+Trashing an app isn't enough — it leaves caches, preferences and container data behind. PureGlass finds the
+app **and** all its leftovers by bundle ID, and shows you exactly what it will remove.
+
+![Uninstaller](assets/05-uninstaller.png)
+
+---
+
+## How PureGlass compares
+
+| | **PureGlass** | CleanMyMac | Mac Sai | Pearcleaner | PureMac | OnyX |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Price** | **Free** | $39.95/yr | Free | Free | Free | Free |
+| **Open source** | ✅ MIT | ❌ | ✅ BSD-3 | ✅ | ✅ MIT | ❌ |
+| **Telemetry** | ✅ **None** | ⚠️ Yes | None | None | None | None |
+| **Real Liquid Glass UI** (macOS 26) | ✅ **Only PureGlass** | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Transparent menu-bar panel + live disk** | ✅ | menu only | ✅ | ❌ | ❌ | ❌ |
+| **Smart Scan (one-click)** | ✅ | ✅ | ✅ | ❌ | partial | ❌ |
+| **System Junk** | ✅ | ✅ | ✅ | — | ✅ | limited |
+| **System Data breakdown + undeletable sizes** | ✅ **Unique** | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Malware scanner** (code-signature) | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **Uninstaller w/ leftover detection** | ✅ | ✅ | ✅ 10-lvl | ✅ | ❌ | ❌ |
+| **Disk treemap visualizer** | ✅ **full-disk** | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **Live per-file deletion log** | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **Risk classification + manual control** | ✅ | partial | ✅ | ✅ | — | — |
+| **Trash-first (recoverable)** | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| **Time Machine snapshot mgmt** | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
+| Duplicate finder | 🚧 roadmap | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Maintenance scripts | 🚧 roadmap | ✅ | ✅ | ❌ | ❌ | ✅ strong |
+
+**Where PureGlass leads:** the only one with **real Liquid Glass**, a **fully transparent** menu-bar panel,
+an honest **System Data breakdown** (including the undeletable part), a **full-disk treemap** (CleanMyMac has
+none), **code-signature** malware detection, and a **live per-path deletion log** — all **free, offline and
+open source**, with no telemetry.
+
+---
+
+## Features
+
+- **Smart Scan** — caches, logs and temp files, one click, nothing deleted without your OK.
+- **System Data** — risk-classified breakdown of the giant "System Data" category, fully manual selection,
+  plus a read-only list of the **undeletable** system areas with sizes, plus Time Machine snapshot management.
+- **Security Scan** — KnockKnock-style persistence + code-signature malware detection, fully offline.
+- **App Uninstaller** — removes apps with all their leftovers (caches, prefs, containers, logs).
+- **Disk Map** — full-disk squarified treemap heatmap with drill-down and a quick location picker.
+- **Menu-bar panel** — a transparent Liquid Glass panel with **live disk metrics (refreshed every second)** and
+  quick actions; a "System Settings → Storage" shortcut.
+- **Live deletion log** — every path scrolls by as it's trashed.
+- **Risk badges** everywhere (🟢 safe · 🟡 caution · 🔴 risky) and a confirmation prompt before any risky delete.
+- **Deep clean** (optional) — system caches/logs via a single admin-password prompt; system items are validated
+  against a stricter safety guard and the command is injection-safe.
+
+---
+
+## Requirements
+
+- macOS **26.0+** (Tahoe) — required for the Liquid Glass material
 - Apple Silicon
-- Xcode **26+**, [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
+- To build: Xcode **26+** and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
 
-## Derleme & Çalıştırma
+> The UI is currently in **Turkish**; localization PRs are welcome.
 
-```bash
-# Geliştirme
-xcodegen generate
-open PureGlass.xcodeproj        # Xcode'da ⌘R
-
-# veya komut satırından
-xcodebuild -project PureGlass.xcodeproj -scheme PureGlass -configuration Debug build
-
-# Testler (çekirdek mantık — güvenlik, tarama, temizlik)
-xcodebuild -project PureGlass.xcodeproj -scheme PureGlass -destination 'platform=macOS' test
-```
-
-## Dağıtım (.dmg)
+## Build & Run
 
 ```bash
-./scripts/build-release.sh      # build/PureGlass.dmg üretir
+git clone https://github.com/GRJY/PureGlass.git
+cd PureGlass
+xcodegen generate          # generate PureGlass.xcodeproj from project.yml
+open PureGlass.xcodeproj    # then ⌘R in Xcode
+
+# or a packaged .dmg:
+./scripts/build-release.sh # → build/PureGlass.dmg
 ```
 
-İmzasız (ad-hoc) sürümde ilk açılışta Gatekeeper uyarısı çıkar:
-**Finder → sağ tık → Aç → Aç**.
+The app is **non-sandboxed** (required for Full Disk Access) and distributed outside the App Store. Because it
+is not notarized (no paid Apple Developer account), the first launch may need **right-click → Open**.
 
-## Tam Disk Erişimi (FDA)
-
-Derin temizlik için bazı korumalı klasörlerin okunması gerekir. FDA bir entitlement
-değildir; **elle** verilir: uygulama içindeki "Ayarları Aç" düğmesi seni
-**Sistem Ayarları → Gizlilik ve Güvenlik → Tam Disk Erişimi**'ne götürür. İzni verince
-uygulama otomatik algılar. (Bu yüzden uygulama **sandbox'sızdır** ve App Store'da olamaz.)
-
-## Mimari
+## Architecture
 
 ```
 Sources/
-  App/            Giriş noktası, şeffaf pencere (NSVisualEffectView), kök görünüm
-  DesignSystem/   Liquid Glass bileşenleri (GlassCard, RiskBadge, LiveLogPanel…)
-  Features/       AppViewModel + ekranlar (Akıllı Tarama, Ayarlar)
-  Core/           = PureGlassKit framework (UI'dan bağımsız, test edilebilir):
-    LocationsDatabase  taranacak yolların tek kaynağı (kategori + risk)
-    SafetyGuard        silme öncesi son güvenlik kapısı (blocklist + symlink/TOCTOU)
-    ScanEngine         eşzamanlı, iptal edilebilir tarama
-    CleaningEngine     trash-first silme + canlı olaylar
-    PermissionCoordinator  Full Disk Access durumu + otomatik yakalama
-Tests/            PureGlassKit birim testleri (güvenlik/tarama/temizlik/izin)
+  App/            Entry point, transparent window, menu-bar status panel
+  DesignSystem/   Liquid Glass components (GlassCard, RiskBadge, ProgressRing, LiveLogPanel…)
+  Features/       View models + screens (Smart Scan, System Data, Security, Uninstaller, Disk Map…)
+  Core/           = PureGlassKit framework (UI-independent, unit-tested):
+    LocationsDatabase     single source of truth for scan paths (category + risk)
+    SafetyGuard           last-line delete guard (blocklist + symlink/TOCTOU)
+    ScanEngine            concurrent, cancellable scanning
+    CleaningEngine        trash-first deletion with live events
+    CodeSignatureInspector  Security-framework signing verification (KnockKnock)
+    ThreatScanner         persistence + malware heuristics
+    DiskMapScanner / TreemapLayout   squarified treemap
+    AppUninstaller        app + leftover discovery
+Tests/            69 unit tests (safety, scan, clean, signing, treemap, uninstaller…)
 ```
 
-## Güvenlik İlkeleri
+## Safety & Privacy
 
-- **Asla** dokunulmaz: `/System`, `/usr`, `/bin`, Apple uygulamaları, SIP korumalı her şey.
-- Silme yalnızca izinli kök dizinlerin **gerçek** (symlink çözülmüş) alt öğelerinde.
-- Her silme öncesi `SafetyGuard.validate` (TOCTOU koruması).
-- Hepsi Çöp'e taşınır — geri alınabilir.
+- **Never touched:** `/System`, `/usr`, `/bin`, Apple apps, anything SIP-protected.
+- Every delete is validated by `SafetyGuard` (blocklist + safe-root + symlink/TOCTOU) **immediately before** removal.
+- User files go to the **Trash** (recoverable). Root-owned system caches are permanently removed only after an
+  explicit confirmation + admin password.
+- **No telemetry, no network, no accounts.** Everything stays on your Mac.
 
-## Dürüst Sınır: "Sistem dosyalarına kadar derin temizlik"
+## Honest limits
 
-macOS'ta **SIP korumalı gerçek sistem dosyaları (`/System` vb.) hiçbir araçla silinemez**
-(CleanMyMac dahil; root bile silemez, FDA bunu geçemez). PureGlass'in "Derin Sistem
-Temizliği": erişilebilir **root-sahipli önbellek/günlük** alanlarını (örn. `/Library/Caches`,
-`/private/var/log`) yönetici parolasıyla siler — `/System` gibi korumalı dosyalara asla
-dokunmaz. UI bunu dürüstçe belirtir.
+- macOS **SIP-protected system files cannot be deleted by any tool** (not even with Full Disk Access). PureGlass
+  shows these as read-only "undeletable system data" with sizes rather than pretending it can remove them.
+- Not notarized (no paid Apple Developer account) → manual first-launch approval.
 
-### Root temizlik nasıl çalışır (FAZ 9)
-Ücretli Developer ID gerektiren `SMAppService`/XPC daemon yerine, imzasız uygulamalarda da
-çalışan **`NSAppleScript ... with administrator privileges`** kullanılır (tek seferlik sistem
-parola istemi). Güvenlik: root komutu yalnızca **yalnız sistem-cache/log köklerini içeren ayrı
-bir `SafetyGuard`'dan** geçen yollar için kurulur; tek-tırnak kaçışı + `rm -rf --` ile kabuk
-enjeksiyonu engellenir. Bu mantık birim testlerle (gerçek komut çalıştırılarak) doğrulanmıştır.
+## Roadmap
 
-## İleride (opsiyonel)
+- Duplicate finder · Maintenance scripts · Universal Binary thinning · Browser privacy cleaner · English/i18n.
 
-- **Notarization** (geniş dağıtım için): ücretli Apple Developer hesabı gerektirir.
-  Gerektiğinde: `ENABLE_HARDENED_RUNTIME=YES` + Developer ID ile imza + `notarytool submit`.
-- Uninstaller (çok-seviyeli app eşleştirme).
+## License
 
-## Lisans / Gizlilik
+[MIT](LICENSE) © Giray Akbulut
 
-Kişisel araç. Hiçbir veri toplanmaz veya gönderilmez.
+<div align="center">
+<sub>Built with SwiftUI for macOS 26 · 100% offline · no telemetry</sub>
+</div>
