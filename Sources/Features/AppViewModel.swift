@@ -23,7 +23,8 @@ final class AppViewModel {
     var phase: Phase = .idle
     var results: [CategoryScanResult] = []
     var selectedURLs: Set<URL> = []
-    var scanProgress: Double = 0
+    let trickle = ProgressTrickler()
+    var scanProgress: Double { trickle.value }
     var scanStatusText = ""
     var scanBytesFound: Int64 = 0
     var lockedCategories = 0
@@ -83,17 +84,18 @@ final class AppViewModel {
         selectedURLs = []
         logLines = []
         report = nil
-        scanProgress = 0
         scanStatusText = "Başlatılıyor…"
+        trickle.start()
 
         let locations = deepClean ? database.locations : database.userSpaceLocations
         let scanned = await scanEngine.scan(locations) { [weak self] progress in
             await MainActor.run {
-                self?.scanProgress = progress.fraction
+                self?.trickle.report(progress.fraction)
                 self?.scanStatusText = progress.currentTitle
                 self?.scanBytesFound = progress.bytesFound
             }
         }
+        trickle.finish()
 
         lockedCategories = scanned.filter { !$0.isAccessible }.count
         results = scanned.filter { $0.isAccessible && !$0.items.isEmpty }
@@ -159,6 +161,6 @@ final class AppViewModel {
         selectedURLs = []
         logLines = []
         report = nil
-        scanProgress = 0
+        trickle.cancel()
     }
 }

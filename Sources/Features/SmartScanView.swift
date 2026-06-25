@@ -87,7 +87,7 @@ struct SmartScanView: View {
 
     private var scanning: some View {
         VStack(spacing: DS.Spacing.l) {
-            ProgressRing(progress: model.scanProgress, size: 140, animating: true)
+            ProgressRing(progress: model.scanProgress, size: 140)
             Text("Taranıyor…").font(.dsTitle)
             Text(model.scanStatusText)
                 .font(.callout)

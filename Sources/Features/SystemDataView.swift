@@ -16,7 +16,8 @@ final class SystemDataViewModel {
     var phase: Phase = .idle
     var results: [CategoryScanResult] = []
     var selectedURLs: Set<URL> = []     // MANUEL: hiçbir şey önceden seçili değil
-    var progress: Double = 0
+    let trickle = ProgressTrickler()
+    var progress: Double { trickle.value }
     var bytesFound: Int64 = 0
     var statusText = ""
     var logLines: [LogLine] = []
@@ -82,10 +83,12 @@ final class SystemDataViewModel {
 
     func scan() async {
         phase = .scanning; results = []; selectedURLs = []; logLines = []; report = nil
-        progress = 0; bytesFound = 0; statusText = "Başlatılıyor…"
+        bytesFound = 0; statusText = "Başlatılıyor…"
+        trickle.start()
         let scanned = await scanEngine.scan(database.systemData) { [weak self] p in
-            await MainActor.run { self?.progress = p.fraction; self?.statusText = p.currentTitle; self?.bytesFound = p.bytesFound }
+            await MainActor.run { self?.trickle.report(p.fraction); self?.statusText = p.currentTitle; self?.bytesFound = p.bytesFound }
         }
+        trickle.finish()
         results = scanned.filter { $0.isAccessible && !$0.items.isEmpty }
         phase = .results
         Task { await measureProtected() }   // silinemez alanı arka planda hesapla (engellemez)
@@ -234,7 +237,7 @@ struct SystemDataView: View {
 
     private var scanning: some View {
         VStack(spacing: DS.Spacing.l) {
-            ProgressRing(progress: model.progress, size: 140, animating: true)
+            ProgressRing(progress: model.progress, size: 140)
             Text("Sistem verileri taranıyor…").font(.dsTitle)
             Text(model.statusText).font(.callout).foregroundStyle(.secondary).lineLimit(1)
             Text("\(model.bytesFound.formattedBytes) bulundu").font(.headline.monospacedDigit()).foregroundStyle(.tint)
