@@ -62,6 +62,18 @@ struct ContentView: View {
             .navigationTitle("PureGlass")
             .scrollContentBackground(.hidden)
             .navigationSplitViewColumnWidth(min: 200, ideal: 230, max: 280)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                HStack(spacing: 8) {
+                    Image(systemName: "sparkles")
+                        .font(.title2)
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(.tint)
+                    Text("PureGlass").font(.dsTitle)
+                    Spacer()
+                }
+                .padding(.horizontal, 14)
+                .padding(.bottom, 10)
+            }
         } detail: {
             detail
                 .background(VisualEffectView(material: .fullScreenUI).ignoresSafeArea())
