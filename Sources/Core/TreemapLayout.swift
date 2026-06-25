@@ -21,6 +21,8 @@ public func squarifiedTreemap(weights: [Double], in rect: CGRect) -> [CGRect] {
     let n = areas.count
 
     while i < n {
+        // Kalan dikdörtgen küçülünce kayan-nokta bozulmasını önle: kalanları .zero bırak.
+        if remaining.width <= 0.5 || remaining.height <= 0.5 { break }
         let side = Double(min(remaining.width, remaining.height))
         var rowCount = 0
         var rowSum = 0.0
@@ -43,24 +45,25 @@ public func squarifiedTreemap(weights: [Double], in rect: CGRect) -> [CGRect] {
             }
         }
 
-        // Satırı yerleştir.
-        let thickness = CGFloat(rowSum / side)
+        // Satırı yerleştir (kalınlığı kalan alana sıkıştır).
         if remaining.width <= remaining.height {
             // Yatay şerit (üstte), kalınlık dikey.
+            let thickness = min(CGFloat(rowSum / side), remaining.height)
             var x = remaining.minX
             for k in i..<(i + rowCount) {
-                let w = CGFloat(areas[k]) / thickness
-                result[k] = CGRect(x: x, y: remaining.minY, width: w, height: thickness)
+                let w = min(CGFloat(areas[k]) / max(thickness, 0.0001), remaining.maxX - x)
+                result[k] = CGRect(x: x, y: remaining.minY, width: max(w, 0), height: thickness)
                 x += w
             }
             remaining = CGRect(x: remaining.minX, y: remaining.minY + thickness,
                                width: remaining.width, height: remaining.height - thickness)
         } else {
             // Dikey şerit (solda), kalınlık yatay.
+            let thickness = min(CGFloat(rowSum / side), remaining.width)
             var y = remaining.minY
             for k in i..<(i + rowCount) {
-                let h = CGFloat(areas[k]) / thickness
-                result[k] = CGRect(x: remaining.minX, y: y, width: thickness, height: h)
+                let h = min(CGFloat(areas[k]) / max(thickness, 0.0001), remaining.maxY - y)
+                result[k] = CGRect(x: remaining.minX, y: y, width: thickness, height: max(h, 0))
                 y += h
             }
             remaining = CGRect(x: remaining.minX + thickness, y: remaining.minY,

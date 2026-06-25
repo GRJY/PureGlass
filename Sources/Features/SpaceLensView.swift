@@ -70,8 +70,10 @@ struct SpaceLensView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            TreemapView(entries: entries) { entry in
-                if entry.isDirectory {
+            TreemapView(entries: displayEntries) { entry in
+                if entry.url == current {
+                    return   // "Diğer" toplu kutusu — gezinme yok
+                } else if entry.isDirectory {
                     stack.append(entry.url)
                     Task { await load() }
                 } else {
@@ -80,6 +82,29 @@ struct SpaceLensView: View {
             }
             .padding(DS.Spacing.m)
         }
+    }
+
+    /// Çok küçük öğeleri tek bir "Diğer" kutusunda toplar (kalabalık + sayısal bozulmayı önler).
+    private var displayEntries: [DiskMapEntry] {
+        guard !entries.isEmpty else { return [] }
+        let total = entries.reduce(0) { $0 + $1.size }
+        guard total > 0 else { return entries }
+
+        let threshold = Double(total) * 0.008                 // toplamın %0,8'i
+        var kept = entries.filter { Double($0.size) >= threshold }
+        if kept.count > 40 { kept = Array(kept.prefix(40)) }   // en fazla 40 kutu
+
+        let keptSize = kept.reduce(0) { $0 + $1.size }
+        let restSize = total - keptSize
+        let restCount = entries.count - kept.count
+        if restSize > 0, restCount > 0 {
+            kept.append(DiskMapEntry(
+                url: current,                                 // tıklanınca gezinmeyen toplu kutu
+                name: "Diğer (\(restCount) öğe)",
+                size: restSize, isDirectory: false, fileCount: restCount
+            ))
+        }
+        return kept
     }
 
     // MARK: - Yükleme / gezinme
@@ -116,8 +141,8 @@ struct TreemapView: View {
             ZStack(alignment: .topLeading) {
                 ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
                     let f = frames[index]
-                    if f.width > 2, f.height > 2 {
-                        TreemapTile(entry: entry, color: color(for: entry))
+                    if f.width > 3, f.height > 3 {
+                        TreemapTile(entry: entry, color: color(for: entry), size: f.size)
                             .frame(width: f.width, height: f.height)
                             .offset(x: f.minX, y: f.minY)
                             .onTapGesture { onTap(entry) }
@@ -125,6 +150,8 @@ struct TreemapView: View {
                     }
                 }
             }
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
+            .clipped()
         }
     }
 
@@ -139,29 +166,36 @@ struct TreemapView: View {
 private struct TreemapTile: View {
     let entry: DiskMapEntry
     let color: Color
+    let size: CGSize
+
+    private var showLabel: Bool { size.width > 56 && size.height > 30 }
+    private var showSize: Bool { size.width > 70 && size.height > 46 }
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            RoundedRectangle(cornerRadius: 6)
-                .fill(color.gradient)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 6)
-                        .strokeBorder(.black.opacity(0.25), lineWidth: 1)
-                )
-            VStack(alignment: .leading, spacing: 1) {
-                Text(entry.name)
-                    .font(.caption.weight(.semibold))
-                    .lineLimit(1)
-                Text(entry.size.formattedBytes)
-                    .font(.caption2)
-                    .opacity(0.85)
-                if entry.isDirectory {
-                    Image(systemName: "folder.fill").font(.caption2).opacity(0.7)
+        RoundedRectangle(cornerRadius: 5)
+            .fill(color.gradient)
+            .overlay(
+                RoundedRectangle(cornerRadius: 5)
+                    .strokeBorder(.black.opacity(0.22), lineWidth: 1)
+            )
+            .overlay(alignment: .topLeading) {
+                if showLabel {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(entry.name)
+                            .font(.caption.weight(.semibold))
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        if showSize {
+                            Text(entry.size.formattedBytes)
+                                .font(.caption2)
+                                .opacity(0.85)
+                        }
+                    }
+                    .foregroundStyle(.black.opacity(0.82))
+                    .padding(6)
                 }
             }
-            .foregroundStyle(.black.opacity(0.8))
-            .padding(6)
-        }
-        .padding(1)
+            .padding(1)
+            .clipped()   // etiket/içerik kutu sınırını taşmasın
     }
 }

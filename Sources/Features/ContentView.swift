@@ -38,7 +38,13 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
 /// Ana pencere: glass kenar çubuğu + detay.
 struct ContentView: View {
     @State private var model = AppViewModel()
-    @State private var selection: SidebarItem? = .smartScan
+    @State private var selection: SidebarItem?
+
+    init() {
+        // Opt-in QA kancası: PUREGLASS_START=spaceLens ile doğrudan Disk Haritası'nda açılır.
+        let start = ProcessInfo.processInfo.environment["PUREGLASS_START"]
+        _selection = State(initialValue: start == "spaceLens" ? .spaceLens : .smartScan)
+    }
 
     var body: some View {
         NavigationSplitView {

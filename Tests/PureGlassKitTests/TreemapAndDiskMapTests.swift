@@ -32,6 +32,26 @@ final class TreemapLayoutTests: XCTestCase {
         XCTAssertEqual(area, Double(rect.width * rect.height), accuracy: 1.0)
     }
 
+    func testNoOverlapsWithLongTinyTail() {
+        // Patolojik girdi: birkaç büyük + çok sayıda minik öğe (eski bozulma senaryosu).
+        var weights = [1000.0, 500.0, 250.0, 120.0]
+        weights += Array(repeating: 0.5, count: 60)
+        let frames = squarifiedTreemap(weights: weights, in: rect)
+        let nonZero = frames.filter { $0.width > 0.6 && $0.height > 0.6 }
+        for a in 0..<nonZero.count {
+            for b in (a + 1)..<nonZero.count {
+                let inter = nonZero[a].intersection(nonZero[b])
+                let overlapArea = inter.isNull ? 0 : Double(inter.width * inter.height)
+                XCTAssertLessThan(overlapArea, 1.0, "Kutular üst üste binmemeli")
+            }
+        }
+        // Hepsi sınır içinde kalmalı.
+        for f in frames {
+            XCTAssertLessThanOrEqual(f.maxX, rect.width + 0.5)
+            XCTAssertLessThanOrEqual(f.maxY, rect.height + 0.5)
+        }
+    }
+
     func testAreaProportionalToWeight() {
         let weights = [6.0, 3.0, 1.0]
         let frames = squarifiedTreemap(weights: weights, in: rect)
