@@ -7,7 +7,7 @@ struct RiskBadge: View {
     let level: RiskLevel
 
     var body: some View {
-        Label(level.title, systemImage: icon)
+        Label(localizedTitle, systemImage: icon)
             .font(.iCaption.weight(.semibold))
             .lineLimit(1)
             .fixedSize(horizontal: true, vertical: false)
@@ -16,6 +16,14 @@ struct RiskBadge: View {
             .padding(.vertical, DS.Spacing.xs)
             .glassEffect(.regular.tint(color.opacity(0.30)), in: .capsule)
             .accessibilityLabel("Risk: \(level.title)")
+    }
+
+    private var localizedTitle: String {
+        switch level {
+        case .safe: L("Güvenli", "Safe")
+        case .caution: L("Dikkat", "Caution")
+        case .danger: L("Riskli", "Risky")
+        }
     }
 
     private var color: Color {

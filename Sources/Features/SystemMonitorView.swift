@@ -116,21 +116,21 @@ struct SystemMonitorView: View {
     private var cpuCard: some View {
         GlassCard(fill: true) {
             VStack(alignment: .leading, spacing: DS.Spacing.s) {
-                cardHeader("İşlemci (CPU)", "cpu", DS.Palette.accent)
+                cardHeader(L("İşlemci (CPU)", "Processor (CPU)"), "cpu", DS.Palette.accent)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(model.cpuTotal, format: .percent.precision(.fractionLength(0)))
                         .font(.dsDisplay(40)).monospacedDigit().contentTransition(.numericText())
-                    Text("kullanım").font(.iCaption).foregroundStyle(.secondary)
+                    Text(L("kullanım", "usage")).font(.iCaption).foregroundStyle(.secondary)
                     Spacer()
-                    Text("\(model.cpuPerCore.count) çekirdek").font(.iCaption2).foregroundStyle(.tertiary)
+                    Text(L("\(model.cpuPerCore.count) çekirdek", "\(model.cpuPerCore.count) cores")).font(.iCaption2).foregroundStyle(.tertiary)
                 }
 
                 cpuHistoryChart
 
                 HStack(spacing: DS.Spacing.l) {
                     cpuLegend("Sistem", model.cpuSystem, DS.Palette.danger)
-                    cpuLegend("Kullanıcı", model.cpuUser, DS.Palette.accent)
-                    cpuLegend("Boş", 1 - model.cpuTotal, .secondary)
+                    cpuLegend(L("Kullanıcı", "User"), model.cpuUser, DS.Palette.accent)
+                    cpuLegend(L("Boş", "Free"), 1 - model.cpuTotal, .secondary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -201,7 +201,7 @@ struct SystemMonitorView: View {
                 Button {
                     NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/Utilities/Activity Monitor.app"))
                 } label: {
-                    Label("Activity Monitor'da aç", systemImage: "arrow.up.forward.app").font(.iCaption)
+                    Label(L("Activity Monitor'da aç", "Open in Activity Monitor"), systemImage: "arrow.up.forward.app").font(.iCaption)
                 }
                 .buttonStyle(.link).foregroundStyle(DS.Palette.accent)
             }.frame(maxWidth: .infinity, alignment: .leading)
@@ -213,18 +213,18 @@ struct SystemMonitorView: View {
     private var thermalCard: some View {
         GlassCard(fill: true) {
             VStack(alignment: .leading, spacing: DS.Spacing.s) {
-                cardHeader("Sıcaklık & Termal", "thermometer.medium", thermalColor)
+                cardHeader(L("Sıcaklık & Termal", "Temperature & Thermal"), "thermometer.medium", thermalColor)
                 HStack {
-                    Text("Termal durum").font(.iCallout).foregroundStyle(.secondary)
+                    Text(L("Termal durum", "Thermal state")).font(.iCallout).foregroundStyle(.secondary)
                     Spacer()
                     Text(thermalTitle).font(.iHeadline).foregroundStyle(thermalColor)
                 }
                 Divider().opacity(0.2)
-                tempRow("CPU bölgesi", model.cpuTemp)
-                tempRow("En sıcak sensör", model.peakTemp)
+                tempRow(L("CPU bölgesi", "CPU area"), model.cpuTemp)
+                tempRow(L("En sıcak sensör", "Hottest sensor"), model.peakTemp)
                 tempRow("Batarya", model.batteryTemp)
                 if !model.hasSMC {
-                    Text("Sıcaklık sensörlerine erişilemiyor.").font(.iCaption2).foregroundStyle(.tertiary)
+                    Text(L("Sıcaklık sensörlerine erişilemiyor.", "Temperature sensors are unavailable.")).font(.iCaption2).foregroundStyle(.tertiary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -261,7 +261,7 @@ struct SystemMonitorView: View {
                     }
                     fanControls(fan)
                 } else {
-                    Text("Bu Mac'te fan yok veya okunamıyor (ör. MacBook Air).")
+                    Text(L("Bu Mac'te fan yok veya okunamıyor (ör. MacBook Air).", "This Mac has no fan or it can't be read (e.g. MacBook Air)."))
                         .font(.iCallout).foregroundStyle(.secondary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading)
@@ -271,7 +271,7 @@ struct SystemMonitorView: View {
     @ViewBuilder
     private func fanControls(_ fan: FanInfo) -> some View {
         if model.fanControlSupported, fan.max > fan.min {
-            Text("Manuel hız (yönetici parolası ister)").font(.iCaption.weight(.medium)).foregroundStyle(.secondary)
+            Text(L("Manuel hız (yönetici parolası ister)", "Manual speed (asks for admin password)")).font(.iCaption.weight(.medium)).foregroundStyle(.secondary)
             HStack(spacing: DS.Spacing.s) {
                 Text("\(Int(fan.min))").font(.iCaption2).foregroundStyle(.tertiary)
                 Slider(value: Binding(get: { model.fanTarget }, set: { model.fanTarget = $0 }),
@@ -285,7 +285,7 @@ struct SystemMonitorView: View {
                     Label("Uygula", systemImage: "wind").padding(.horizontal, 4)
                 }
                 .buttonStyle(.glassProminent).tint(.accentColor).disabled(model.fanBusy)
-                Button("Normale Dön") { Task { await model.setAutoFan() } }
+                Button(L("Normale Dön", "Reset to Auto")) { Task { await model.setAutoFan() } }
                     .buttonStyle(.glass).disabled(model.fanBusy)
                 if model.fanBusy { ProgressView().controlSize(.small) }
                 Spacer()
@@ -293,10 +293,10 @@ struct SystemMonitorView: View {
             if let e = model.fanError {
                 Text(e).font(.iCaption2).foregroundStyle(DS.Palette.danger)
             } else {
-                Text("Manuel modda fan otomatik hızlanmaz.").font(.iCaption2).foregroundStyle(.tertiary)
+                Text(L("Manuel modda fan otomatik hızlanmaz.", "In manual mode the fan won't auto-speed up.")).font(.iCaption2).foregroundStyle(.tertiary)
             }
         } else if !model.fanControlSupported {
-            Text("Fan kontrolü bu çipte (M3+) Apple tarafından kısıtlı — yalnızca okuma.")
+            Text(L("Fan kontrolü bu çipte (M3+) Apple tarafından kısıtlı — yalnızca okuma.", "Fan control is restricted by Apple on this chip (M3+) — read-only."))
                 .font(.iCaption2).foregroundStyle(.tertiary).fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -310,7 +310,7 @@ struct SystemMonitorView: View {
 
     private var thermalTitle: String {
         switch model.thermalState {
-        case .nominal: "Normal"; case .fair: "Orta"; case .serious: "Yüksek"; case .critical: "Kritik"
+        case .nominal: "Normal"; case .fair: "Orta"; case .serious: L("Yüksek", "High"); case .critical: "Kritik"
         @unknown default: "—"
         }
     }

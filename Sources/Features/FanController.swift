@@ -16,7 +16,7 @@ enum FanController {
     @MainActor
     static func setManual(rpm: Int) throws {
         guard let h = helperURL, FileManager.default.fileExists(atPath: h.path) else {
-            throw Failure(message: "Yardımcı bileşen (pgsmc) bulunamadı.")
+            throw Failure(message: L("Yardımcı bileşen (pgsmc) bulunamadı.", "Helper component (pgsmc) not found."))
         }
         try AdminShell.run("'\(h.path)' set \(rpm)")
     }
@@ -24,7 +24,7 @@ enum FanController {
     @MainActor
     static func setAuto() throws {
         guard let h = helperURL, FileManager.default.fileExists(atPath: h.path) else {
-            throw Failure(message: "Yardımcı bileşen (pgsmc) bulunamadı.")
+            throw Failure(message: L("Yardımcı bileşen (pgsmc) bulunamadı.", "Helper component (pgsmc) not found."))
         }
         try AdminShell.run("'\(h.path)' auto")
     }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Özet istatistik kutucuğu (örn. "Kazanılacak alan: 12,4 GB").
+/// Özet istatistik kutucuğu (örn. L("Kazanılacak alan: 12,4 GB", "Space to gain: 12.4 GB")).
 struct StatTile: View {
     let title: String
     let value: String

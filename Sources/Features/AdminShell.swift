@@ -19,12 +19,12 @@ enum AdminShell {
         let source = "do shell script \"\(escaped)\" with administrator privileges"
 
         guard let script = NSAppleScript(source: source) else {
-            throw Failure(message: "Yetkili komut hazırlanamadı.")
+            throw Failure(message: L("Yetkili komut hazırlanamadı.", "Could not prepare the privileged command."))
         }
         var error: NSDictionary?
         script.executeAndReturnError(&error)
         if let error {
-            let msg = (error[NSAppleScript.errorMessage] as? String) ?? "Yetkili komut başarısız oldu."
+            let msg = (error[NSAppleScript.errorMessage] as? String) ?? L("Yetkili komut başarısız oldu.", "The privileged command failed.")
             throw Failure(message: msg)
         }
     }

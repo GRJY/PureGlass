@@ -27,7 +27,7 @@ struct ProgressRing: View {
         }
         .frame(width: size, height: size)
         .accessibilityElement()
-        .accessibilityLabel("İlerleme")
+        .accessibilityLabel(L("İlerleme", "Progress"))
         .accessibilityValue(Text(clamped, format: .percent.precision(.fractionLength(0))))
     }
 

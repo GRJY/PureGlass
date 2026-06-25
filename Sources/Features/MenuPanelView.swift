@@ -188,16 +188,16 @@ struct MenuPanelView: View {
         VStack(alignment: .leading, spacing: DS.Spacing.m) {
             diskMetrics
             VStack(spacing: 2) {
-                row("Hızlı Tarama", "magnifyingglass") {
+                row(L("Hızlı Tarama", "Quick Scan"), "magnifyingglass") {
                     model.selectedSection = .smartScan; onOpenMain(); Task { await model.scan() }
                 }
-                row("Güvenlik Taraması", "shield.lefthalf.filled") {
+                row(L("Güvenlik Taraması", "Security Scan"), "shield.lefthalf.filled") {
                     model.selectedSection = .security; onOpenMain()
                 }
-                row("Disk Haritası", "chart.pie") {
+                row(L("Disk Haritası", "Disk Map"), "chart.pie") {
                     model.selectedSection = .spaceLens; onOpenMain()
                 }
-                row("Uygulama Kaldırıcı", "trash.square") {
+                row(L("Uygulama Kaldırıcı", "App Uninstaller"), "trash.square") {
                     model.selectedSection = .uninstaller; onOpenMain()
                 }
             }
@@ -206,22 +206,22 @@ struct MenuPanelView: View {
 
     private var systemTab: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
-            meterRow("İşlemci", "cpu", "%\(Int((sys.cpu * 100).rounded()))",
+            meterRow(L("İşlemci", "Processor"), "cpu", "%\(Int((sys.cpu * 100).rounded()))",
                      fraction: sys.cpu, tint: DS.Palette.accent, valueColor: DS.Palette.accent)
             meterRow("Bellek", "memorychip", sys.memUsed.formattedBytes,
                      fraction: sys.memFraction,
                      tint: sys.memFraction > 0.9 ? DS.Palette.danger : DS.Palette.safe, valueColor: .primary)
-            meterRow("Sıcaklık", "thermometer.medium", sys.temp.map { "\(Int($0.rounded()))°" } ?? "—",
+            meterRow(L("Sıcaklık", "Temperature"), "thermometer.medium", sys.temp.map { "\(Int($0.rounded()))°" } ?? "—",
                      fraction: (sys.temp ?? 0) / 100, tint: tempColor(sys.temp), valueColor: tempColor(sys.temp))
             meterRow("Fan", "fanblades", sys.fan.map { "\(Int($0)) RPM" } ?? "—",
                      fraction: sys.fanInfo.map { $0.max > 0 ? $0.current / $0.max : 0 } ?? 0,
                      tint: DS.Palette.accent, valueColor: .primary)
 
             VStack(spacing: 2) {
-                row("Sistem Monitörü'nü Aç", "gauge.with.dots.needle.67percent") {
+                row(L("Sistem Monitörü'nü Aç", "Open System Monitor"), "gauge.with.dots.needle.67percent") {
                     model.selectedSection = .monitor; onOpenMain()
                 }
-                row("Bakım", "wrench.and.screwdriver") {
+                row(L("Bakım", "Maintenance"), "wrench.and.screwdriver") {
                     model.selectedSection = .maintenance; onOpenMain()
                 }
             }
@@ -254,7 +254,7 @@ struct MenuPanelView: View {
                 }
 
                 if sys.fanControlSupported, fan.max > fan.min {
-                    Text("Manuel hız (yönetici parolası ister)").font(.iCaption2).foregroundStyle(.secondary)
+                    Text(L("Manuel hız (yönetici parolası ister)", "Manual speed (asks for admin password)")).font(.iCaption2).foregroundStyle(.secondary)
                     HStack(spacing: DS.Spacing.s) {
                         Text("\(Int(fan.min))").font(.iCaption2).foregroundStyle(.tertiary)
                         Slider(value: Binding(get: { sys.fanTarget }, set: { sys.fanTarget = $0 }), in: fan.min...fan.max, step: 50)
@@ -266,7 +266,7 @@ struct MenuPanelView: View {
                             Label("Uygula", systemImage: "wind")
                         }
                         .buttonStyle(.borderedProminent).controlSize(.small).disabled(sys.fanBusy)
-                        Button("Normale Dön") { Task { await sys.setAutoFan() } }
+                        Button(L("Normale Dön", "Reset to Auto")) { Task { await sys.setAutoFan() } }
                             .buttonStyle(.bordered).controlSize(.small).disabled(sys.fanBusy)
                         if sys.fanBusy { ProgressView().controlSize(.small) }
                         Spacer()
@@ -274,14 +274,14 @@ struct MenuPanelView: View {
                     if let e = sys.fanError {
                         Text(e).font(.iCaption2).foregroundStyle(DS.Palette.danger).lineLimit(2)
                     } else {
-                        Text("Manuel modda fan otomatik hızlanmaz.").font(.iCaption2).foregroundStyle(.tertiary)
+                        Text(L("Manuel modda fan otomatik hızlanmaz.", "In manual mode the fan won't auto-speed up.")).font(.iCaption2).foregroundStyle(.tertiary)
                     }
                 } else if !sys.fanControlSupported {
-                    Text("Fan kontrolü bu çipte (M3+) Apple tarafından kısıtlı — yalnızca okuma.")
+                    Text(L("Fan kontrolü bu çipte (M3+) Apple tarafından kısıtlı — yalnızca okuma.", "Fan control is restricted by Apple on this chip (M3+) — read-only."))
                         .font(.iCaption2).foregroundStyle(.tertiary).fixedSize(horizontal: false, vertical: true)
                 }
             } else {
-                Text("Bu Mac'te fan yok veya okunamıyor (ör. MacBook Air).")
+                Text(L("Bu Mac'te fan yok veya okunamıyor (ör. MacBook Air).", "This Mac has no fan or it can't be read (e.g. MacBook Air)."))
                     .font(.iCallout).foregroundStyle(.secondary)
             }
         }
@@ -296,7 +296,7 @@ struct MenuPanelView: View {
                 .foregroundStyle(.tint)
             VStack(alignment: .leading, spacing: 0) {
                 Text("PureGlass").font(.iHeadline)
-                Text("Hızlı temizlik").font(.iCaption).foregroundStyle(.secondary)
+                Text(L("Hızlı temizlik", "Quick cleanup")).font(.iCaption).foregroundStyle(.secondary)
             }
             Spacer()
         }
@@ -313,12 +313,12 @@ struct MenuPanelView: View {
                 Button {
                     openStorageSettings()
                 } label: {
-                    Label("Sistem Ayarları", systemImage: "gearshape")
+                    Label(L("Sistem Ayarları", "System Settings"), systemImage: "gearshape")
                         .font(.iCaption2)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.tint)
-                .help("Sistem Ayarları → Depolama'yı aç")
+                .help(L("Sistem Ayarları → Depolama'yı aç", "Open System Settings → Storage"))
             }
 
             ProgressView(value: disk.usedFraction)
@@ -326,13 +326,13 @@ struct MenuPanelView: View {
                       : disk.usedFraction > 0.75 ? DS.Palette.caution : DS.Palette.accent)
 
             HStack(spacing: DS.Spacing.m) {
-                metric("Boş", disk.free.formattedBytes, DS.Palette.safe)
-                metric("Kullanılan", disk.used.formattedBytes, .primary)
+                metric(L("Boş", "Free"), disk.free.formattedBytes, DS.Palette.safe)
+                metric(L("Kullanılan", "Used"), disk.used.formattedBytes, .primary)
                 if disk.purgeable > 0 {
-                    metric("Boşaltılabilir", disk.purgeable.formattedBytes, DS.Palette.accent)
+                    metric(L("Boşaltılabilir", "Purgeable"), disk.purgeable.formattedBytes, DS.Palette.accent)
                 }
             }
-            Text("Toplam \(disk.total.formattedBytes) • her saniye güncellenir")
+            Text(L("Toplam \(disk.total.formattedBytes) • her saniye güncellenir", "Total \(disk.total.formattedBytes) • updates every second"))
                 .font(.iCaption2).foregroundStyle(.tertiary)
         }
     }
@@ -358,7 +358,7 @@ struct MenuPanelView: View {
     private var footer: some View {
         HStack {
             Spacer()
-            Button("Çık") { NSApp.terminate(nil) }
+            Button(L("Çık", "Quit")) { NSApp.terminate(nil) }
                 .buttonStyle(.plain)
                 .font(.iCaption.weight(.medium))
                 .foregroundStyle(.secondary)

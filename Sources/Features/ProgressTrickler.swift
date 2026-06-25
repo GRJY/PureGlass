@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-/// "Sızdıran" ilerleme: gerçek ilerleme uzun bir adımda takılsa bile gösterilen
+/// L("Sızdıran", "Leaking") ilerleme: gerçek ilerleme uzun bir adımda takılsa bile gösterilen
 /// yüzde yavaşça yukarı süzülür (91 → 92 → 93…), bir tavana asimptotik yaklaşır.
 /// Gerçek ilerleme öne geçerse onu takip eder; iş bitince %100'e atlar.
 @MainActor

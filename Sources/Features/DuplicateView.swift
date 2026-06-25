@@ -30,7 +30,7 @@ final class DuplicateViewModel {
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
-        panel.prompt = "Seç"
+        panel.prompt = L("Seç", "Pick")
         if panel.runModal() == .OK, let url = panel.url { root = url }
     }
 
@@ -51,7 +51,7 @@ final class DuplicateViewModel {
         for url in selectedURLs {
             if (try? FileManager.default.trashItem(at: url, resultingItemURL: nil)) != nil { trashed += 1 }
         }
-        resultMessage = "\(trashed) kopya Çöp'e taşındı"
+        resultMessage = L("\(trashed) kopya Çöp'e taşındı", "\(trashed) copies moved to Trash")
         await scan()
     }
 }
@@ -70,8 +70,8 @@ struct DuplicateView: View {
     private var header: some View {
         HStack(spacing: DS.Spacing.m) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Yinelenen Dosyalar").font(.dsTitle)
-                Text("Aynı içeriğe sahip dosyaları bulur (içerik karması ile). Bir kopya tutulur, gerisini sen seçip silersin.")
+                Text(L("Yinelenen Dosyalar", "Duplicate Files")).font(.dsTitle)
+                Text(L("Aynı içeriğe sahip dosyaları bulur (içerik karması ile). Bir kopya tutulur, gerisini sen seçip silersin.", "Finds files with identical content (by content hash). One copy is kept; you pick and delete the rest."))
                     .font(.iCaption).foregroundStyle(.secondary).lineLimit(2)
             }
             Spacer()
@@ -87,17 +87,17 @@ struct DuplicateView: View {
     @ViewBuilder
     private var content: some View {
         if model.scanning {
-            centered { ProgressView().controlSize(.large); Text("Yinelenenler aranıyor…").foregroundStyle(.secondary) }
+            centered { ProgressView().controlSize(.large); Text(L("Yinelenenler aranıyor…", "Searching for duplicates…")).foregroundStyle(.secondary) }
         } else if !model.scanned {
             centered {
                 Image(systemName: "doc.on.doc").font(.system(size: 56, weight: .light)).symbolRenderingMode(.hierarchical).foregroundStyle(.tint)
-                Text("Bir klasör seç ve tara").font(.dsTitle)
-                Text("Varsayılan: \(model.root.path)").font(.iCaption).foregroundStyle(.tertiary)
+                Text(L("Bir klasör seç ve tara", "Pick a folder and scan")).font(.dsTitle)
+                Text(L("Varsayılan: \(model.root.path)", "Default: \(model.root.path)")).font(.iCaption).foregroundStyle(.tertiary)
             }
         } else if model.groups.isEmpty {
             centered {
                 Image(systemName: "checkmark.circle.fill").font(.system(size: 56)).foregroundStyle(DS.Palette.safe)
-                Text("Yinelenen dosya bulunamadı").font(.dsTitle)
+                Text(L("Yinelenen dosya bulunamadı", "No duplicate files found")).font(.dsTitle)
             }
         } else {
             VStack(spacing: 0) {
@@ -111,7 +111,7 @@ struct DuplicateView: View {
                             HStack {
                                 Text("\(group.urls.count) kopya").font(.iHeadline)
                                 Spacer()
-                                Text("\(group.wastedBytes.formattedBytes) boşa").font(.iSubheadline.weight(.semibold)).foregroundStyle(DS.Palette.caution)
+                                Text(L("\(group.wastedBytes.formattedBytes) boşa", "\(group.wastedBytes.formattedBytes) wasted")).font(.iSubheadline.weight(.semibold)).foregroundStyle(DS.Palette.caution)
                             }
                         }
                     }
@@ -142,13 +142,13 @@ struct DuplicateView: View {
     private var cleanBar: some View {
         HStack(spacing: DS.Spacing.m) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Seçili: \(model.totalSelected.formattedBytes)").font(.iHeadline)
-                Text("Toplam boşa: \(model.totalWasted.formattedBytes)").font(.iCaption).foregroundStyle(.secondary)
+                Text(L("Seçili: \(model.totalSelected.formattedBytes)", "Selected: \(model.totalSelected.formattedBytes)")).font(.iHeadline)
+                Text(L("Toplam boşa: \(model.totalWasted.formattedBytes)", "Total wasted: \(model.totalWasted.formattedBytes)")).font(.iCaption).foregroundStyle(.secondary)
             }
             if let msg = model.resultMessage { Text(msg).font(.iCaption).foregroundStyle(DS.Palette.safe) }
             Spacer()
             Button { Task { await model.clean() } } label: {
-                Label("Çöp'e Taşı", systemImage: "trash").padding(.horizontal, DS.Spacing.s)
+                Label(L("Çöp'e Taşı", "Move to Trash"), systemImage: "trash").padding(.horizontal, DS.Spacing.s)
             }
             .buttonStyle(.glassProminent).tint(DS.Palette.danger).disabled(model.selectedURLs.isEmpty)
         }

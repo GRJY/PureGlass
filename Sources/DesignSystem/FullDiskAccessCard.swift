@@ -11,13 +11,13 @@ struct FullDiskAccessCard: View {
         GlassCard {
             VStack(alignment: .leading, spacing: DS.Spacing.m) {
                 HStack {
-                    Label("Tam Disk Erişimi", systemImage: "lock.shield")
+                    Label(L("Tam Disk Erişimi", "Full Disk Access"), systemImage: "lock.shield")
                         .font(.dsTitle)
                     Spacer()
                     statusBadge
                 }
 
-                Text("Derin temizlik için PureGlass'in korumalı klasörleri okuması gerekir. İzin Sistem Ayarları'ndan elle verilir; verilerin cihazından çıkmaz.")
+                Text(L("Derin temizlik için PureGlass'in korumalı klasörleri okuması gerekir. İzin Sistem Ayarları'ndan elle verilir; verilerin cihazından çıkmaz.", "Deep clean needs PureGlass to read protected folders. You grant the permission manually in System Settings; your data never leaves the device."))
                     .font(.iCallout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -25,7 +25,7 @@ struct FullDiskAccessCard: View {
                 if !coordinator.isGranted {
                     HStack(spacing: DS.Spacing.m) {
                         Button { openSettings() } label: {
-                            Label("Ayarları Aç", systemImage: "arrow.up.forward.app")
+                            Label(L("Ayarları Aç", "Open Settings"), systemImage: "arrow.up.forward.app")
                                 .padding(.horizontal, DS.Spacing.s)
                         }
                         .buttonStyle(.glassProminent)

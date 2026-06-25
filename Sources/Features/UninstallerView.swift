@@ -47,7 +47,7 @@ final class UninstallerViewModel {
             do { try FileManager.default.trashItem(at: url, resultingItemURL: nil); trashed += 1 }
             catch { failed += 1 }
         }
-        resultMessage = "\(app.name): \(trashed) öğe Çöp'e taşındı" + (failed > 0 ? " • \(failed) başarısız (yetki gerekebilir)" : "")
+        resultMessage = L("\(app.name): \(trashed) öğe Çöp'e taşındı", "\(app.name): \(trashed) items moved to Trash") + (failed > 0 ? L(" • \(failed) başarısız (yetki gerekebilir)", " • \(failed) failed (may need privileges)") : "")
         removing = false
         selected = nil
         await load()
@@ -76,8 +76,8 @@ struct UninstallerView: View {
     private var header: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Uygulama Kaldırıcı").font(.dsTitle)
-                Text("Uygulamayı, geride bıraktığı ayar ve veri artıklarıyla birlikte eksiksiz kaldırır. Önce neyi sileceğini gösterir.")
+                Text(L("Uygulama Kaldırıcı", "App Uninstaller")).font(.dsTitle)
+                Text(L("Uygulamayı, geride bıraktığı ayar ve veri artıklarıyla birlikte eksiksiz kaldırır. Önce neyi sileceğini gösterir.", "Removes an app completely, along with the settings and data leftovers it leaves behind. Shows you what will be deleted first."))
                     .font(.iCaption).foregroundStyle(.secondary)
                     .lineLimit(2)
             }
@@ -92,7 +92,7 @@ struct UninstallerView: View {
     private var loadingView: some View {
         VStack(spacing: DS.Spacing.m) {
             ProgressView().controlSize(.large)
-            Text("Uygulamalar taranıyor…").foregroundStyle(.secondary)
+            Text(L("Uygulamalar taranıyor…", "Scanning apps…")).foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -120,7 +120,7 @@ struct UninstallerView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .searchable(text: $model.search, prompt: "Uygulama ara")
+        .searchable(text: $model.search, prompt: L("Uygulama ara", "Search apps"))
     }
 }
 
@@ -135,14 +135,14 @@ struct UninstallSheet: View {
                 AppIcon(url: app.url, size: 56)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(app.name).font(.dsTitle)
-                    Text("Toplam kaldırılacak: \(model.totalRemovalSize.formattedBytes)")
+                    Text(L("Toplam kaldırılacak: \(model.totalRemovalSize.formattedBytes)", "Total to remove: \(model.totalRemovalSize.formattedBytes)"))
                         .font(.iCallout).foregroundStyle(.secondary)
                 }
                 Spacer()
             }
 
             VStack(alignment: .leading, spacing: DS.Spacing.xs) {
-                Text("Kaldırılacak öğeler").font(.iHeadline)
+                Text(L("Kaldırılacak öğeler", "Items to remove")).font(.iHeadline)
                 ScrollView {
                     VStack(alignment: .leading, spacing: DS.Spacing.xs) {
                         itemRow(name: "\(app.name).app", path: app.url.path, size: app.size, icon: "app.fill")
@@ -158,18 +158,18 @@ struct UninstallSheet: View {
             }
 
             if model.leftovers.isEmpty {
-                Text("Bu uygulama için ek artık bulunamadı.")
+                Text(L("Bu uygulama için ek artık bulunamadı.", "No extra leftovers found for this app."))
                     .font(.iCaption).foregroundStyle(.tertiary)
             }
 
             HStack(spacing: DS.Spacing.m) {
-                Button("Vazgeç") { model.selected = nil }
+                Button(L("Vazgeç", "Cancel")) { model.selected = nil }
                     .buttonStyle(.glass)
                     .controlSize(.large)
                 Button {
                     Task { await model.uninstall() }
                 } label: {
-                    Label(model.removing ? "Kaldırılıyor…" : "Çöp'e Taşı", systemImage: "trash")
+                    Label(model.removing ? L("Kaldırılıyor…", "Removing…") : L("Çöp'e Taşı", "Move to Trash"), systemImage: "trash")
                         .padding(.horizontal, DS.Spacing.s)
                 }
                 .buttonStyle(.glassProminent)

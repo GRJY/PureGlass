@@ -27,9 +27,9 @@ final class SecurityViewModel {
         do {
             try FileManager.default.trashItem(at: path, resultingItemURL: nil)
             threats.removeAll { $0.id == threat.id }
-            resultMessage = "\(path.lastPathComponent) karantinaya alındı (Çöp Kutusu)"
+            resultMessage = L("\(path.lastPathComponent) karantinaya alındı (Çöp Kutusu)", "\(path.lastPathComponent) quarantined (Trash)")
         } catch {
-            resultMessage = "Karantina başarısız (yetki gerekebilir): \(error.localizedDescription)"
+            resultMessage = L("Karantina başarısız (yetki gerekebilir): \(error.localizedDescription)", "Quarantine failed (may need privileges): \(error.localizedDescription)")
         }
     }
 
@@ -60,12 +60,12 @@ struct SecurityView: View {
                     .font(.system(size: 60, weight: .light))
                     .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(.tint)
-                Text("Güvenlik Taraması").font(.dsDisplay(36))
-                Text("Açılışta arka planda çalışan gizli programları bulur, Apple onaylı olup olmadıklarını denetler ve şüphelileri işaretler. Tüm veriler cihazında kalır.")
+                Text(L("Güvenlik Taraması", "Security Scan")).font(.dsDisplay(36))
+                Text(L("Açılışta arka planda çalışan gizli programları bulur, Apple onaylı olup olmadıklarını denetler ve şüphelileri işaretler. Tüm veriler cihazında kalır.", "Finds hidden programs that run in the background at startup, checks whether each is Apple-approved, and flags the suspicious ones. All data stays on your device."))
                     .font(.iCallout).foregroundStyle(.secondary)
                     .multilineTextAlignment(.center).frame(maxWidth: 460)
                 Button { Task { await model.scan() } } label: {
-                    Label("Taramayı Başlat", systemImage: "shield")
+                    Label(L("Taramayı Başlat", "Start Scan"), systemImage: "shield")
                         .font(.iTitle3)
                         .padding(.horizontal, DS.Spacing.l).padding(.vertical, DS.Spacing.s)
                 }
@@ -78,7 +78,7 @@ struct SecurityView: View {
     private var scanning: some View {
         VStack(spacing: DS.Spacing.m) {
             ProgressView().controlSize(.large)
-            Text("Tehditler taranıyor…").foregroundStyle(.secondary)
+            Text(L("Tehditler taranıyor…", "Scanning for threats…")).foregroundStyle(.secondary)
         }
         .padding(DS.Spacing.xxl)
     }
@@ -86,9 +86,9 @@ struct SecurityView: View {
     private var clean: some View {
         VStack(spacing: DS.Spacing.m) {
             Image(systemName: "checkmark.shield.fill").font(.system(size: 64)).foregroundStyle(DS.Palette.safe)
-            Text("Tehdit bulunamadı").font(.dsDisplay(30))
-            Text("Bilinen göstergeler ve şüpheli kalıcı görevler bulunamadı.").foregroundStyle(.secondary)
-            Button("Tekrar Tara") { Task { await model.scan() } }.buttonStyle(.glass)
+            Text(L("Tehdit bulunamadı", "No threats found")).font(.dsDisplay(30))
+            Text(L("Bilinen göstergeler ve şüpheli kalıcı görevler bulunamadı.", "No known indicators or suspicious persistence found.")).foregroundStyle(.secondary)
+            Button(L("Tekrar Tara", "Scan Again")) { Task { await model.scan() } }.buttonStyle(.glass)
         }
         .padding(DS.Spacing.xxl)
     }
@@ -104,13 +104,13 @@ struct SecurityView: View {
             }
             .scrollContentBackground(.hidden)
             HStack {
-                Label("\(model.threats.count) bulgu", systemImage: "exclamationmark.triangle.fill")
+                Label(L("\(model.threats.count) bulgu", "\(model.threats.count) findings"), systemImage: "exclamationmark.triangle.fill")
                     .foregroundStyle(DS.Palette.caution)
                 if let msg = model.resultMessage {
                     Text(msg).font(.iCaption).foregroundStyle(.secondary)
                 }
                 Spacer()
-                Button("Tekrar Tara") { Task { await model.scan() } }.buttonStyle(.glass)
+                Button(L("Tekrar Tara", "Scan Again")) { Task { await model.scan() } }.buttonStyle(.glass)
             }
             .padding(DS.Spacing.l)
             .glassEffect(.regular, in: .rect(cornerRadius: DS.Radius.l))
@@ -146,9 +146,9 @@ private struct ThreatRow: View {
             VStack(spacing: DS.Spacing.xs) {
                 if threat.path != nil {
                     Button { onReveal() } label: { Image(systemName: "magnifyingglass") }
-                        .buttonStyle(.glass).controlSize(.small).help("Finder'da Göster")
+                        .buttonStyle(.glass).controlSize(.small).help(L("Finder'da Göster", "Show in Finder"))
                     Button { onQuarantine() } label: { Image(systemName: "trash") }
-                        .buttonStyle(.glass).controlSize(.small).help("Karantinaya Al (Çöp)")
+                        .buttonStyle(.glass).controlSize(.small).help(L("Karantinaya Al (Çöp)", "Quarantine (Trash)"))
                 }
             }
         }

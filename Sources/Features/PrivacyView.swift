@@ -35,7 +35,7 @@ final class PrivacyViewModel {
         for url in selected {
             if (try? FileManager.default.trashItem(at: url, resultingItemURL: nil)) != nil { trashed += 1 }
         }
-        resultMessage = "\(trashed) öğe Çöp'e taşındı"
+        resultMessage = L("\(trashed) öğe Çöp'e taşındı", "\(trashed) items moved to Trash")
         await scan()
     }
 }
@@ -45,9 +45,9 @@ struct PrivacyView: View {
 
     var body: some View {
         Group {
-            if model.scanning { centered { ProgressView().controlSize(.large); Text("Tarayıcı verileri taranıyor…").foregroundStyle(.secondary) } }
+            if model.scanning { centered { ProgressView().controlSize(.large); Text(L("Tarayıcı verileri taranıyor…", "Scanning browser data…")).foregroundStyle(.secondary) } }
             else if !model.scanned { idle }
-            else if model.items.isEmpty { centered { Image(systemName: "checkmark.circle.fill").font(.system(size: 56)).foregroundStyle(DS.Palette.safe); Text("Temizlenecek tarayıcı verisi yok").font(.dsTitle) } }
+            else if model.items.isEmpty { centered { Image(systemName: "checkmark.circle.fill").font(.system(size: 56)).foregroundStyle(DS.Palette.safe); Text(L("Temizlenecek tarayıcı verisi yok", "No browser data to clean")).font(.dsTitle) } }
             else { results }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -57,11 +57,11 @@ struct PrivacyView: View {
         ScrollView {
             VStack(spacing: DS.Spacing.l) {
                 Image(systemName: "hand.raised").font(.system(size: 58, weight: .light)).symbolRenderingMode(.hierarchical).foregroundStyle(.tint)
-                Text("Tarayıcı Gizliliği").font(.dsDisplay(34))
-                Text("Safari, Chrome, Firefox, Brave ve Edge'in önbellek, geçmiş ve çerez verilerini bulup temizler. Her şey Çöp'e gider (geri alınabilir).")
+                Text(L("Tarayıcı Gizliliği", "Browser Privacy")).font(.dsDisplay(34))
+                Text(L("Safari, Chrome, Firefox, Brave ve Edge'in önbellek, geçmiş ve çerez verilerini bulup temizler. Her şey Çöp'e gider (geri alınabilir).", "Finds and clears cache, history and cookies for Safari, Chrome, Firefox, Brave and Edge. Everything goes to the Trash (recoverable)."))
                     .font(.iCallout).foregroundStyle(.secondary).multilineTextAlignment(.center).frame(maxWidth: 460)
                 Button { Task { await model.scan() } } label: {
-                    Label("Tarayıcıları Tara", systemImage: "magnifyingglass").font(.iTitle3).padding(.horizontal, DS.Spacing.l).padding(.vertical, DS.Spacing.s)
+                    Label(L("Tarayıcıları Tara", "Scan Browsers"), systemImage: "magnifyingglass").font(.iTitle3).padding(.horizontal, DS.Spacing.l).padding(.vertical, DS.Spacing.s)
                 }.buttonStyle(.glassProminent).tint(.accentColor).controlSize(.extraLarge)
             }
             .padding(DS.Spacing.xxl).frame(maxWidth: .infinity)
@@ -92,11 +92,11 @@ struct PrivacyView: View {
             }
             .scrollContentBackground(.hidden)
             HStack {
-                Text("Seçili: \(model.totalSelected.formattedBytes)").font(.iHeadline)
+                Text(L("Seçili: \(model.totalSelected.formattedBytes)", "Selected: \(model.totalSelected.formattedBytes)")).font(.iHeadline)
                 if let msg = model.resultMessage { Text(msg).font(.iCaption).foregroundStyle(DS.Palette.safe) }
                 Spacer()
-                Button("Yeniden Tara") { Task { await model.scan() } }.buttonStyle(.glass)
-                Button { Task { await model.clean() } } label: { Label("Çöp'e Taşı", systemImage: "trash").padding(.horizontal, DS.Spacing.s) }
+                Button(L("Yeniden Tara", "Rescan")) { Task { await model.scan() } }.buttonStyle(.glass)
+                Button { Task { await model.clean() } } label: { Label(L("Çöp'e Taşı", "Move to Trash"), systemImage: "trash").padding(.horizontal, DS.Spacing.s) }
                     .buttonStyle(.glassProminent).tint(DS.Palette.danger).disabled(model.selected.isEmpty)
             }
             .padding(DS.Spacing.l)

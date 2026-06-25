@@ -30,14 +30,14 @@ struct SpaceLensView: View {
 
     private var rootMenu: some View {
         Menu {
-            Button("Ana Klasör", systemImage: "house") { setRoot(home) }
-            Button("Tüm Disk (/)", systemImage: "internaldrive") { setRoot(URL(filePath: "/")) }
+            Button(L("Ana Klasör", "Home Folder"), systemImage: "house") { setRoot(home) }
+            Button(L("Tüm Disk (/)", "Whole Disk (/)"), systemImage: "internaldrive") { setRoot(URL(filePath: "/")) }
             Divider()
-            Button("Xcode/Simülatör (/Library/Developer)", systemImage: "hammer") { setRoot(URL(filePath: "/Library/Developer")) }
+            Button(L("Xcode/Simülatör (/Library/Developer)", "Xcode/Simulator (/Library/Developer)"), systemImage: "hammer") { setRoot(URL(filePath: "/Library/Developer")) }
             Button("Homebrew (/opt/homebrew)", systemImage: "terminal") { setRoot(URL(filePath: "/opt/homebrew")) }
             Button("/usr/local", systemImage: "terminal") { setRoot(URL(filePath: "/usr/local")) }
             Button("Ollama (~/.ollama)", systemImage: "brain.head.profile") { setRoot(home.appending(path: ".ollama")) }
-            Button("Konteynerler", systemImage: "shippingbox") { setRoot(home.appending(path: "Library/Containers")) }
+            Button(L("Konteynerler", "Containers"), systemImage: "shippingbox") { setRoot(home.appending(path: "Library/Containers")) }
             Button("/Library", systemImage: "building.columns") { setRoot(URL(filePath: "/Library")) }
         } label: {
             Label("Konum", systemImage: "folder.badge.gearshape")
@@ -47,8 +47,8 @@ struct SpaceLensView: View {
     }
 
     private var rootDisplayName: String {
-        if rootURL.path == "/" { return "Tüm Disk" }
-        if rootURL.path == home.path { return "Ana Klasör" }
+        if rootURL.path == "/" { return L("Tüm Disk", "Whole Disk") }
+        if rootURL.path == home.path { return L("Ana Klasör", "Home Folder") }
         return rootURL.lastPathComponent.isEmpty ? rootURL.path : rootURL.lastPathComponent
     }
 
@@ -72,14 +72,14 @@ struct SpaceLensView: View {
             }
             Spacer()
             if !loading {
-                Text("\(totalSize.formattedBytes) • \(entries.count) öğe")
+                Text(L("\(totalSize.formattedBytes) • \(entries.count) öğe", "\(totalSize.formattedBytes) • \(entries.count) items"))
                     .font(.iCaption)
                     .foregroundStyle(.secondary)
             }
             Button {
                 NSWorkspace.shared.open(current)
             } label: {
-                Label("Finder'da Aç", systemImage: "arrow.up.forward.app")
+                Label(L("Finder'da Aç", "Open in Finder"), systemImage: "arrow.up.forward.app")
             }
             .buttonStyle(.glass)
             .controlSize(.small)
@@ -95,19 +95,19 @@ struct SpaceLensView: View {
         if loading {
             VStack(spacing: DS.Spacing.m) {
                 ProgressView().controlSize(.large)
-                Text("Boyutlar hesaplanıyor…").foregroundStyle(.secondary)
+                Text(L("Boyutlar hesaplanıyor…", "Calculating sizes…")).foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if entries.isEmpty {
             VStack(spacing: DS.Spacing.s) {
                 Image(systemName: "chart.pie").font(.system(size: 48)).foregroundStyle(.tint)
-                Text("Bu klasör boş veya okunamıyor").foregroundStyle(.secondary)
+                Text(L("Bu klasör boş veya okunamıyor", "This folder is empty or unreadable")).foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             TreemapView(entries: displayEntries) { entry in
                 if entry.url == current {
-                    return   // "Diğer" toplu kutusu — gezinme yok
+                    return   // L("Diğer", "Other") toplu kutusu — gezinme yok
                 } else if entry.isDirectory {
                     stack.append(entry.url)
                     Task { await load() }
@@ -119,7 +119,7 @@ struct SpaceLensView: View {
         }
     }
 
-    /// Çok küçük öğeleri tek bir "Diğer" kutusunda toplar (kalabalık + sayısal bozulmayı önler).
+    /// Çok küçük öğeleri tek bir L("Diğer", "Other") kutusunda toplar (kalabalık + sayısal bozulmayı önler).
     private var displayEntries: [DiskMapEntry] {
         guard !entries.isEmpty else { return [] }
         let total = entries.reduce(0) { $0 + $1.size }
@@ -135,7 +135,7 @@ struct SpaceLensView: View {
         if restSize > 0, restCount > 0 {
             kept.append(DiskMapEntry(
                 url: current,                                 // tıklanınca gezinmeyen toplu kutu
-                name: "Diğer (\(restCount) öğe)",
+                name: L("Diğer (\(restCount) öğe)", "Other (\(restCount) items)"),
                 size: restSize, isDirectory: false, fileCount: restCount
             ))
         }

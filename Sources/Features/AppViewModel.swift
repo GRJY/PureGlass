@@ -84,7 +84,7 @@ final class AppViewModel {
         selectedURLs = []
         logLines = []
         report = nil
-        scanStatusText = "Başlatılıyor…"
+        scanStatusText = L("Başlatılıyor…", "Starting…")
         trickle.start()
 
         let locations = deepClean ? database.locations : database.userSpaceLocations
@@ -133,9 +133,9 @@ final class AppViewModel {
     private func cleanPrivileged(_ items: [FileItem]) async -> [CleanEvent] {
         let (valid, skipped) = privilegedCleaner.partition(items)
         var events: [CleanEvent] = skipped.map {
-            CleanEvent(url: $0.url, size: $0.size, outcome: .skippedUnsafe("Sistem güvenli alanı dışında"))
+            CleanEvent(url: $0.url, size: $0.size, outcome: .skippedUnsafe(L("Sistem güvenli alanı dışında", "Outside the system safe zone")))
         }
-        skipped.forEach { logLines.append(LogLine(event: CleanEvent(url: $0.url, size: $0.size, outcome: .skippedUnsafe("güvensiz")))) }
+        skipped.forEach { logLines.append(LogLine(event: CleanEvent(url: $0.url, size: $0.size, outcome: .skippedUnsafe(L("güvensiz", "unsafe"))))) }
 
         guard let command = privilegedCleaner.buildCommand(for: valid.map(\.url)) else { return events }
         do {

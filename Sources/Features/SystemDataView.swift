@@ -32,12 +32,12 @@ final class SystemDataViewModel {
 
     /// macOS'un çalışması için gerekli, silinemez korumalı alanlar.
     private let protectedLocations: [(String, String)] = [
-        ("Sistem Çerçeveleri", "/System/Library/Frameworks"),
-        ("Özel Sistem Çerçeveleri", "/System/Library/PrivateFrameworks"),
-        ("Yerleşik Uygulamalar", "/System/Applications"),
-        ("Sistem Veritabanları", "/private/var/db"),
-        ("Sistem Kütüphaneleri", "/usr/lib"),
-        ("Apple Sistem İçeriği", "/Library/Apple"),
+        (L("Sistem Çerçeveleri", "System Frameworks"), "/System/Library/Frameworks"),
+        (L("Özel Sistem Çerçeveleri", "Private System Frameworks"), "/System/Library/PrivateFrameworks"),
+        (L("Yerleşik Uygulamalar", "Built-in Apps"), "/System/Applications"),
+        (L("Sistem Veritabanları", "System Databases"), "/private/var/db"),
+        (L("Sistem Kütüphaneleri", "System Libraries"), "/usr/lib"),
+        (L("Apple Sistem İçeriği", "Apple System Content"), "/Library/Apple"),
     ]
 
     /// Seçimde sarı (dikkat) veya kırmızı (riskli) öğe var mı?
@@ -83,7 +83,7 @@ final class SystemDataViewModel {
 
     func scan() async {
         phase = .scanning; results = []; selectedURLs = []; logLines = []; report = nil
-        bytesFound = 0; statusText = "Başlatılıyor…"
+        bytesFound = 0; statusText = L("Başlatılıyor…", "Starting…")
         trickle.start()
         let scanned = await scanEngine.scan(database.systemData) { [weak self] p in
             await MainActor.run { self?.trickle.report(p.fraction); self?.statusText = p.currentTitle; self?.bytesFound = p.bytesFound }
@@ -135,7 +135,7 @@ final class SystemDataViewModel {
 
     private func cleanPrivileged(_ items: [FileItem]) async -> [CleanEvent] {
         let (valid, skipped) = privilegedCleaner.partition(items)
-        var events = skipped.map { CleanEvent(url: $0.url, size: $0.size, outcome: .skippedUnsafe("güvensiz")) }
+        var events = skipped.map { CleanEvent(url: $0.url, size: $0.size, outcome: .skippedUnsafe(L("güvensiz", "unsafe"))) }
         guard let cmd = privilegedCleaner.buildCommand(for: valid.map(\.url)) else { return events }
         do {
             try AdminShell.run(cmd)
@@ -177,27 +177,27 @@ struct SystemDataView: View {
         }
     }
 
-    /// Time Machine yerel anlık görüntüleri — "Sistem Verileri"nin en büyük gizli bileşeni.
+    /// Time Machine yerel anlık görüntüleri — L("Sistem Verileri", "System Data")nin en büyük gizli bileşeni.
     @ViewBuilder
     private var snapshotCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: DS.Spacing.s) {
                 HStack {
-                    Label("Time Machine Anlık Görüntüleri", systemImage: "clock.arrow.2.circlepath")
+                    Label(L("Time Machine Anlık Görüntüleri", "Time Machine Snapshots"), systemImage: "clock.arrow.2.circlepath")
                         .font(.dsTitle)
                     Spacer()
                     Text("\(model.snapshotCount) adet")
                         .font(.iCaption.weight(.semibold))
                         .foregroundStyle(model.snapshotCount > 0 ? DS.Palette.caution : DS.Palette.safe)
                 }
-                Text("Time Machine'in Mac'ine geçici olarak kaydettiği yedek kopyalar. Genellikle \"Sistem Verileri\"nin en büyük parçasıdır ama normal dosya gibi görünmedikleri için listede çıkmazlar. macOS bunları 24 saat içinde kendisi siler; istersen şimdi temizleyebilirsin — tamamen güvenlidir, zaten boş alan olarak sayılırlar.")
+                Text(L("Time Machine'in Mac'ine geçici olarak kaydettiği yedek kopyalar. Genellikle \"Sistem Verileri\"nin en büyük parçasıdır ama normal dosya gibi görünmedikleri için listede çıkmazlar. macOS bunları 24 saat içinde kendisi siler; istersen şimdi temizleyebilirsin — tamamen güvenlidir, zaten boş alan olarak sayılırlar.", "Backup copies Time Machine temporarily saves to your Mac. They're usually the biggest part of \"System Data\" but don't show in the list because they don't look like normal files. macOS deletes them itself within 24 hours; you can clear them now if you like — it's completely safe, they already count as free space."))
                     .font(.iCallout).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 if model.snapshotCount > 0 {
                     Button {
                         Task { await model.deleteSnapshots() }
                     } label: {
-                        Label(model.snapshotBusy ? "Siliniyor…" : "Anlık Görüntüleri Sil",
+                        Label(model.snapshotBusy ? "Siliniyor…" : L("Anlık Görüntüleri Sil", "Delete Snapshots"),
                               systemImage: "trash").padding(.horizontal, DS.Spacing.s)
                     }
                     .buttonStyle(.glassProminent).tint(DS.Palette.caution).disabled(model.snapshotBusy)
@@ -213,20 +213,20 @@ struct SystemDataView: View {
             VStack(spacing: DS.Spacing.l) {
                 Image(systemName: "macwindow.on.rectangle")
                     .font(.system(size: 58, weight: .light)).symbolRenderingMode(.hierarchical).foregroundStyle(.tint)
-                Text("Sistem Verileri").font(.dsDisplay(38))
-                Text("Depolama'daki gizemli \"Sistem Verileri\"nin içinde ne var, gösterir: önbellek, iOS yedekleri, geliştirici dosyaları. Hiçbiri otomatik seçilmez — neyi sileceğine sen karar verirsin.")
+                Text(L("Sistem Verileri", "System Data")).font(.dsDisplay(38))
+                Text(L("Depolama'daki gizemli \"Sistem Verileri\"nin içinde ne var, gösterir: önbellek, iOS yedekleri, geliştirici dosyaları. Hiçbiri otomatik seçilmez — neyi sileceğine sen karar verirsin.", "Shows what's inside the mysterious \"System Data\" in Storage: caches, iOS backups, developer files. Nothing is auto-selected — you decide what to delete."))
                     .font(.iCallout).foregroundStyle(.secondary).multilineTextAlignment(.center).frame(maxWidth: 460)
                 GlassCard {
                     HStack(spacing: DS.Spacing.m) {
-                        RiskBadge(level: .safe); Text("güvenle silinir").font(.iCaption).foregroundStyle(.secondary)
-                        RiskBadge(level: .caution); Text("dikkatli").font(.iCaption).foregroundStyle(.secondary)
-                        RiskBadge(level: .danger); Text("veri kaybı olabilir").font(.iCaption).foregroundStyle(.secondary)
+                        RiskBadge(level: .safe); Text(L("güvenle silinir", "safe to delete")).font(.iCaption).foregroundStyle(.secondary)
+                        RiskBadge(level: .caution); Text(L("dikkatli", "caution")).font(.iCaption).foregroundStyle(.secondary)
+                        RiskBadge(level: .danger); Text(L("veri kaybı olabilir", "may cause data loss")).font(.iCaption).foregroundStyle(.secondary)
                     }
                 }
                 .frame(maxWidth: 560)
                 snapshotCard
                 Button { Task { await model.scan() } } label: {
-                    Label("Dosya-tabanlı Sistem Verilerini Tara", systemImage: "magnifyingglass")
+                    Label(L("Dosya-tabanlı Sistem Verilerini Tara", "Scan File-based System Data"), systemImage: "magnifyingglass")
                         .font(.iTitle3).padding(.horizontal, DS.Spacing.l).padding(.vertical, DS.Spacing.s)
                 }
                 .buttonStyle(.glassProminent).tint(.accentColor).controlSize(.extraLarge)
@@ -238,7 +238,7 @@ struct SystemDataView: View {
     private var scanning: some View {
         VStack(spacing: DS.Spacing.l) {
             ProgressRing(progress: model.progress, size: 140)
-            Text("Sistem verileri taranıyor…").font(.dsTitle)
+            Text(L("Sistem verileri taranıyor…", "Scanning system data…")).font(.dsTitle)
             Text(model.statusText).font(.iCallout).foregroundStyle(.secondary).lineLimit(1)
             Text("\(model.bytesFound.formattedBytes) bulundu").font(.iHeadline.monospacedDigit()).foregroundStyle(.tint)
         }
@@ -258,11 +258,11 @@ struct SystemDataView: View {
             .scrollContentBackground(.hidden)
             cleanBar
         }
-        .alert("Bu işlem geri alınamayabilir", isPresented: $showConfirm) {
-            Button("Sil", role: .destructive) { Task { await model.clean() } }
-            Button("Vazgeç", role: .cancel) {}
+        .alert(L("Bu işlem geri alınamayabilir", "This action may be irreversible"), isPresented: $showConfirm) {
+            Button(L("Sil", "Delete"), role: .destructive) { Task { await model.clean() } }
+            Button(L("Vazgeç", "Cancel"), role: .cancel) {}
         } message: {
-            Text("Seçiminde riskli (sarı/kırmızı) öğeler var. Kırmızı sistem öğeleri KALICI silinir ve geri alınamaz. Silmek istediğine emin misin?")
+            Text(L("Seçiminde riskli (sarı/kırmızı) öğeler var. Kırmızı sistem öğeleri KALICI silinir ve geri alınamaz. Silmek istediğine emin misin?", "Your selection has risky (yellow/red) items. Red system items are deleted PERMANENTLY and can't be undone. Are you sure?"))
         }
     }
 
@@ -273,7 +273,7 @@ struct SystemDataView: View {
             if model.protectedLoading && model.protectedResults.isEmpty {
                 HStack(spacing: DS.Spacing.s) {
                     ProgressView().controlSize(.small)
-                    Text("Korumalı alan hesaplanıyor…").font(.iCallout).foregroundStyle(.secondary)
+                    Text(L("Korumalı alan hesaplanıyor…", "Calculating protected space…")).font(.iCallout).foregroundStyle(.secondary)
                 }
             }
             ForEach(model.protectedResults) { p in
@@ -291,7 +291,7 @@ struct SystemDataView: View {
         } header: {
             HStack(spacing: DS.Spacing.s) {
                 Image(systemName: "lock.shield").foregroundStyle(.secondary)
-                Text("Silinemez Sistem Verileri").font(.iHeadline)
+                Text(L("Silinemez Sistem Verileri", "Undeletable System Data")).font(.iHeadline)
                 Text("macOS gerektirir").font(.iCaption2).foregroundStyle(.tertiary)
                 Spacer()
                 if model.protectedTotal > 0 {
@@ -333,15 +333,15 @@ struct SystemDataView: View {
     private var cleanBar: some View {
         HStack(spacing: DS.Spacing.m) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Seçili: \(model.totalSelected.formattedBytes)").font(.iHeadline)
-                Text("Toplam: \(model.totalFound.formattedBytes) • geri alınabilir (Çöp)").font(.iCaption).foregroundStyle(.secondary)
+                Text(L("Seçili: \(model.totalSelected.formattedBytes)", "Selected: \(model.totalSelected.formattedBytes)")).font(.iHeadline)
+                Text(L("Toplam: \(model.totalFound.formattedBytes) • geri alınabilir (Çöp)", "Total: \(model.totalFound.formattedBytes) • recoverable (Trash)")).font(.iCaption).foregroundStyle(.secondary)
             }
             Spacer()
-            Button("Yeniden Tara") { Task { await model.scan() } }.buttonStyle(.glass)
+            Button(L("Yeniden Tara", "Rescan")) { Task { await model.scan() } }.buttonStyle(.glass)
             Button {
                 if model.hasRiskySelection { showConfirm = true } else { Task { await model.clean() } }
             } label: {
-                Label("Çöp'e Taşı", systemImage: "trash").padding(.horizontal, DS.Spacing.s)
+                Label(L("Çöp'e Taşı", "Move to Trash"), systemImage: "trash").padding(.horizontal, DS.Spacing.s)
             }
             .buttonStyle(.glassProminent).tint(DS.Palette.danger).disabled(model.selectedItems.isEmpty)
         }
@@ -352,7 +352,7 @@ struct SystemDataView: View {
 
     private var cleaning: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.l) {
-            HStack(spacing: DS.Spacing.m) { ProgressView().controlSize(.large); Text("Çöp'e taşınıyor…").font(.dsTitle) }
+            HStack(spacing: DS.Spacing.m) { ProgressView().controlSize(.large); Text(L("Çöp'e taşınıyor…", "Moving to Trash…")).font(.dsTitle) }
             LiveLogPanel(lines: model.logLines, height: 400)
         }
         .padding(DS.Spacing.xxl)
@@ -361,18 +361,18 @@ struct SystemDataView: View {
     private var done: some View {
         VStack(spacing: DS.Spacing.l) {
             Image(systemName: "checkmark.seal.fill").font(.system(size: 64)).foregroundStyle(DS.Palette.safe)
-            Text("Temizlik tamamlandı").font(.dsDisplay(32))
+            Text(L("Temizlik tamamlandı", "Cleanup complete")).font(.dsDisplay(32))
             if let r = model.report {
                 HStack(spacing: DS.Spacing.m) {
-                    StatTile(title: "Geri kazanılan", value: r.bytesReclaimed.formattedBytes, systemImage: "internaldrive", tint: DS.Palette.safe)
-                    StatTile(title: "Çöp'e taşınan", value: "\(r.trashedCount)", systemImage: "trash")
+                    StatTile(title: L("Geri kazanılan", "Reclaimed"), value: r.bytesReclaimed.formattedBytes, systemImage: "internaldrive", tint: DS.Palette.safe)
+                    StatTile(title: L("Çöp'e taşınan", "Moved to Trash"), value: "\(r.trashedCount)", systemImage: "trash")
                     if r.skippedCount + r.failedCount > 0 {
                         StatTile(title: "Atlanan/Hata", value: "\(r.skippedCount + r.failedCount)", systemImage: "exclamationmark.triangle", tint: DS.Palette.caution)
                     }
                 }.frame(maxWidth: 640)
             }
-            Button("Tekrar Tara") { Task { await model.scan() } }.buttonStyle(.glassProminent).tint(.accentColor)
-            Text("Silinenler Çöp Kutusu'nda — geri alabilirsin.").font(.iCaption).foregroundStyle(.tertiary)
+            Button(L("Tekrar Tara", "Scan Again")) { Task { await model.scan() } }.buttonStyle(.glassProminent).tint(.accentColor)
+            Text(L("Silinenler Çöp Kutusu'nda — geri alabilirsin.", "Deleted items are in the Trash — you can restore them.")).font(.iCaption).foregroundStyle(.tertiary)
         }
         .padding(DS.Spacing.xxl).frame(maxWidth: .infinity, maxHeight: .infinity)
     }

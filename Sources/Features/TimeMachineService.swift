@@ -1,7 +1,7 @@
 import Foundation
 
 /// Time Machine yerel APFS anlık görüntüleri (local snapshots).
-/// "Sistem Verileri"nin en büyük gizli bileşeni; DOSYA DEĞİLDİR (APFS snapshot),
+/// L("Sistem Verileri", "System Data")nin en büyük gizli bileşeni; DOSYA DEĞİLDİR (APFS snapshot),
 /// bu yüzden dosya taramasıyla görülemez — `tmutil` ile yönetilir.
 enum TimeMachineService {
     /// `/` üzerindeki yerel snapshot adlarını döndürür (örn. 2026-06-25-104512).
