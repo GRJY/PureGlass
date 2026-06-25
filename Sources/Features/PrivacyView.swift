@@ -59,9 +59,9 @@ struct PrivacyView: View {
                 Image(systemName: "hand.raised").font(.system(size: 58, weight: .light)).symbolRenderingMode(.hierarchical).foregroundStyle(.tint)
                 Text("Tarayıcı Gizliliği").font(.dsDisplay(34))
                 Text("Safari, Chrome, Firefox, Brave ve Edge'in önbellek, geçmiş ve çerez verilerini bulup temizler. Her şey Çöp'e gider (geri alınabilir).")
-                    .font(.headline).foregroundStyle(.secondary).multilineTextAlignment(.center).frame(maxWidth: 540)
+                    .font(.iHeadline).foregroundStyle(.secondary).multilineTextAlignment(.center).frame(maxWidth: 540)
                 Button { Task { await model.scan() } } label: {
-                    Label("Tarayıcıları Tara", systemImage: "magnifyingglass").font(.title3.weight(.semibold)).padding(.horizontal, DS.Spacing.l).padding(.vertical, DS.Spacing.s)
+                    Label("Tarayıcıları Tara", systemImage: "magnifyingglass").font(.iTitle3).padding(.horizontal, DS.Spacing.l).padding(.vertical, DS.Spacing.s)
                 }.buttonStyle(.glassProminent).tint(.accentColor).controlSize(.extraLarge)
             }
             .padding(DS.Spacing.xxl).frame(maxWidth: .infinity)
@@ -77,23 +77,23 @@ struct PrivacyView: View {
                             HStack(spacing: DS.Spacing.s) {
                                 Toggle(isOn: Binding(get: { model.isSelected(item.url) }, set: { _ in model.toggle(item.url) })) { EmptyView() }
                                     .toggleStyle(.checkbox).labelsHidden()
-                                Text(item.kind).font(.callout)
+                                Text(item.kind).font(.iCallout)
                                 Text(item.url.path).font(.dsMono).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
                                 Spacer()
-                                Text(item.size.formattedBytes).font(.callout.monospacedDigit()).foregroundStyle(.secondary)
+                                Text(item.size.formattedBytes).font(.iCallout.monospacedDigit()).foregroundStyle(.secondary)
                             }
                             .padding(.vertical, 2)
                         }
                     } header: {
-                        HStack { Image(systemName: "globe"); Text(group.browser).font(.headline); Spacer()
-                            Text(group.items.reduce(Int64(0)){$0+$1.size}.formattedBytes).font(.subheadline.weight(.semibold)).foregroundStyle(.secondary) }
+                        HStack { Image(systemName: "globe"); Text(group.browser).font(.iHeadline); Spacer()
+                            Text(group.items.reduce(Int64(0)){$0+$1.size}.formattedBytes).font(.iSubheadline.weight(.semibold)).foregroundStyle(.secondary) }
                     }
                 }
             }
             .scrollContentBackground(.hidden)
             HStack {
-                Text("Seçili: \(model.totalSelected.formattedBytes)").font(.headline)
-                if let msg = model.resultMessage { Text(msg).font(.caption).foregroundStyle(DS.Palette.safe) }
+                Text("Seçili: \(model.totalSelected.formattedBytes)").font(.iHeadline)
+                if let msg = model.resultMessage { Text(msg).font(.iCaption).foregroundStyle(DS.Palette.safe) }
                 Spacer()
                 Button("Yeniden Tara") { Task { await model.scan() } }.buttonStyle(.glass)
                 Button { Task { await model.clean() } } label: { Label("Çöp'e Taşı", systemImage: "trash").padding(.horizontal, DS.Spacing.s) }

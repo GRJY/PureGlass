@@ -71,7 +71,7 @@ struct LiveLogPanel: View {
         HStack(spacing: DS.Spacing.s) {
             Image(systemName: line.status.icon)
                 .foregroundStyle(line.status.color)
-                .font(.caption)
+                .font(.iCaption)
                 .frame(width: 16)
             Text(line.path)
                 .font(.dsMono)

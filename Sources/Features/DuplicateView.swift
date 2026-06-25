@@ -72,7 +72,7 @@ struct DuplicateView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Yinelenen Dosyalar").font(.dsTitle)
                 Text("Aynı içeriğe sahip dosyaları bulur (içerik karması ile). Bir kopya tutulur, gerisini sen seçip silersin.")
-                    .font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                    .font(.iCaption).foregroundStyle(.secondary).lineLimit(2)
             }
             Spacer()
             Button { model.pickFolder() } label: { Label(model.root.lastPathComponent, systemImage: "folder") }
@@ -92,7 +92,7 @@ struct DuplicateView: View {
             centered {
                 Image(systemName: "doc.on.doc").font(.system(size: 56, weight: .light)).symbolRenderingMode(.hierarchical).foregroundStyle(.tint)
                 Text("Bir klasör seç ve tara").font(.dsTitle)
-                Text("Varsayılan: \(model.root.path)").font(.caption).foregroundStyle(.tertiary)
+                Text("Varsayılan: \(model.root.path)").font(.iCaption).foregroundStyle(.tertiary)
             }
         } else if model.groups.isEmpty {
             centered {
@@ -109,9 +109,9 @@ struct DuplicateView: View {
                             }
                         } header: {
                             HStack {
-                                Text("\(group.urls.count) kopya").font(.headline)
+                                Text("\(group.urls.count) kopya").font(.iHeadline)
                                 Spacer()
-                                Text("\(group.wastedBytes.formattedBytes) boşa").font(.subheadline.weight(.semibold)).foregroundStyle(DS.Palette.caution)
+                                Text("\(group.wastedBytes.formattedBytes) boşa").font(.iSubheadline.weight(.semibold)).foregroundStyle(DS.Palette.caution)
                             }
                         }
                     }
@@ -128,13 +128,13 @@ struct DuplicateView: View {
                 .toggleStyle(.checkbox).labelsHidden()
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: DS.Spacing.s) {
-                    Text(url.lastPathComponent).font(.callout).lineLimit(1)
-                    if isFirst { Text("tutulacak").font(.caption2).foregroundStyle(DS.Palette.safe) }
+                    Text(url.lastPathComponent).font(.iCallout).lineLimit(1)
+                    if isFirst { Text("tutulacak").font(.iCaption2).foregroundStyle(DS.Palette.safe) }
                 }
                 Text(url.path).font(.dsMono).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
             }
             Spacer()
-            Text(size.formattedBytes).font(.callout.monospacedDigit()).foregroundStyle(.secondary)
+            Text(size.formattedBytes).font(.iCallout.monospacedDigit()).foregroundStyle(.secondary)
         }
         .padding(.vertical, 2)
     }
@@ -142,10 +142,10 @@ struct DuplicateView: View {
     private var cleanBar: some View {
         HStack(spacing: DS.Spacing.m) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Seçili: \(model.totalSelected.formattedBytes)").font(.headline)
-                Text("Toplam boşa: \(model.totalWasted.formattedBytes)").font(.caption).foregroundStyle(.secondary)
+                Text("Seçili: \(model.totalSelected.formattedBytes)").font(.iHeadline)
+                Text("Toplam boşa: \(model.totalWasted.formattedBytes)").font(.iCaption).foregroundStyle(.secondary)
             }
-            if let msg = model.resultMessage { Text(msg).font(.caption).foregroundStyle(DS.Palette.safe) }
+            if let msg = model.resultMessage { Text(msg).font(.iCaption).foregroundStyle(DS.Palette.safe) }
             Spacer()
             Button { Task { await model.clean() } } label: {
                 Label("Çöp'e Taşı", systemImage: "trash").padding(.horizontal, DS.Spacing.s)

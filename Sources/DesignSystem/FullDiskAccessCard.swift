@@ -18,7 +18,7 @@ struct FullDiskAccessCard: View {
                 }
 
                 Text("Derin temizlik için PureGlass'in korumalı klasörleri okuması gerekir. İzin Sistem Ayarları'ndan elle verilir; verilerin cihazından çıkmaz.")
-                    .font(.callout)
+                    .font(.iCallout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -48,7 +48,7 @@ struct FullDiskAccessCard: View {
     @ViewBuilder
     private var statusBadge: some View {
         Label(statusTitle, systemImage: statusIcon)
-            .font(.caption.weight(.semibold))
+            .font(.iCaption.weight(.semibold))
             .foregroundStyle(statusColor)
             .padding(.horizontal, DS.Spacing.s)
             .padding(.vertical, DS.Spacing.xs)

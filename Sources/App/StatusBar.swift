@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import CoreText
 
 /// Uygulama yaşam döngüsü + paylaşılan durum + menü çubuğu denetleyicisi.
 @MainActor
@@ -13,6 +14,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     override init() {
         super.init()
         AppDelegate.shared = self
+        Self.registerFonts()
+    }
+
+    private static func registerFonts() {
+        for name in ["InterVariable", "InterVariable-Italic"] {
+            if let url = Bundle.main.url(forResource: name, withExtension: "ttf") {
+                CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+            }
+        }
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {

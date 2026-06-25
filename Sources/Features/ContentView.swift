@@ -64,7 +64,7 @@ struct ContentView: View {
             .navigationSplitViewColumnWidth(min: 200, ideal: 230, max: 280)
         } detail: {
             detail
-                .background(VisualEffectView(material: .underWindowBackground).ignoresSafeArea())
+                .background(VisualEffectView(material: .fullScreenUI).ignoresSafeArea())
         }
         .task {
             // Opt-in QA kancası: PUREGLASS_AUTOSCAN=1 ile açılınca otomatik tara (salt-okunur).

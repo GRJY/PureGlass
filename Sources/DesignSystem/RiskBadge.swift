@@ -8,7 +8,7 @@ struct RiskBadge: View {
 
     var body: some View {
         Label(level.title, systemImage: icon)
-            .font(.caption.weight(.semibold))
+            .font(.iCaption.weight(.semibold))
             .foregroundStyle(color)
             .padding(.horizontal, DS.Spacing.s)
             .padding(.vertical, DS.Spacing.xs)

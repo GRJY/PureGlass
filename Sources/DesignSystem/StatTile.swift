@@ -10,7 +10,7 @@ struct StatTile: View {
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
             Label(title, systemImage: systemImage)
-                .font(.caption.weight(.medium))
+                .font(.iCaption.weight(.medium))
                 .foregroundStyle(.secondary)
             Text(value)
                 .font(.dsDisplay(30))

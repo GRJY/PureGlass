@@ -58,13 +58,13 @@ struct SpaceLensView: View {
             Divider().frame(height: 14)
             ForEach(Array(stack.enumerated()), id: \.offset) { index, url in
                 if index > 0 {
-                    Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary)
+                    Image(systemName: "chevron.right").font(.iCaption2).foregroundStyle(.tertiary)
                 }
                 Button {
                     navigate(to: index)
                 } label: {
                     Text(index == 0 ? rootDisplayName : url.lastPathComponent)
-                        .font(.callout.weight(index == stack.count - 1 ? .semibold : .regular))
+                        .font(.iCallout.weight(index == stack.count - 1 ? .semibold : .regular))
                         .lineLimit(1)
                 }
                 .buttonStyle(.plain)
@@ -73,7 +73,7 @@ struct SpaceLensView: View {
             Spacer()
             if !loading {
                 Text("\(totalSize.formattedBytes) • \(entries.count) öğe")
-                    .font(.caption)
+                    .font(.iCaption)
                     .foregroundStyle(.secondary)
             }
             Button {
@@ -227,12 +227,12 @@ private struct TreemapTile: View {
                 if showLabel {
                     VStack(alignment: .leading, spacing: 1) {
                         Text(entry.name)
-                            .font(.caption.weight(.semibold))
+                            .font(.iCaption.weight(.semibold))
                             .lineLimit(1)
                             .truncationMode(.tail)
                         if showSize {
                             Text(entry.size.formattedBytes)
-                                .font(.caption2)
+                                .font(.iCaption2)
                                 .opacity(0.85)
                         }
                     }

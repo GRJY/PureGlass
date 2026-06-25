@@ -36,12 +36,25 @@ enum DS {
 }
 
 extension Font {
-    /// Büyük başlıklar için yuvarlatılmış görünüm.
-    static func dsDisplay(_ size: CGFloat = 40) -> Font {
-        .system(size: size, weight: .bold, design: .rounded)
+    /// Inter (değişken font). Uygulama açılışında kaydedilir (AppDelegate).
+    static func inter(_ size: CGFloat, relativeTo style: Font.TextStyle = .body, weight: Font.Weight = .regular) -> Font {
+        .custom("InterVariable", size: size, relativeTo: style).weight(weight)
     }
-    static let dsTitle = Font.system(.title2, design: .rounded).weight(.semibold)
-    static let dsSection = Font.system(.headline, design: .rounded)
-    /// Dosya yolları / canlı log için tek aralıklı.
+
+    /// Büyük başlıklar.
+    static func dsDisplay(_ size: CGFloat = 40) -> Font { inter(size, relativeTo: .largeTitle, weight: .bold) }
+    static let dsTitle = inter(20, relativeTo: .title2, weight: .semibold)
+    static let dsSection = inter(17, relativeTo: .headline, weight: .semibold)
+
+    // Inter gövde/yardımcı stilleri (sistem text-style'larının Inter karşılıkları)
+    static let iBody = inter(13, relativeTo: .body)
+    static let iHeadline = inter(13, relativeTo: .headline, weight: .semibold)
+    static let iSubheadline = inter(12, relativeTo: .subheadline)
+    static let iCallout = inter(12, relativeTo: .callout)
+    static let iCaption = inter(11, relativeTo: .caption)
+    static let iCaption2 = inter(10, relativeTo: .caption2)
+    static let iTitle3 = inter(17, relativeTo: .title3, weight: .semibold)
+
+    /// Dosya yolları / canlı log için tek aralıklı (Inter mono değildir → sistem mono kalır).
     static let dsMono = Font.system(.callout, design: .monospaced)
 }

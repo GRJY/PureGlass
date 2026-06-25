@@ -62,11 +62,11 @@ struct SecurityView: View {
                     .foregroundStyle(.tint)
                 Text("Güvenlik Taraması").font(.dsDisplay(36))
                 Text("Mac'ine zararlı yazılım bulaşmış mı diye kontrol eder.\nAçılışta arka planda kendini çalıştıran gizli programları bulur, her birinin Apple onaylı (güvenli) olup olmadığını denetler ve şüphelileri işaretler.\n\nHer şey cihazında kalır — internete hiçbir veri gönderilmez.")
-                    .font(.callout).foregroundStyle(.secondary)
+                    .font(.iCallout).foregroundStyle(.secondary)
                     .multilineTextAlignment(.center).frame(maxWidth: 560)
                 Button { Task { await model.scan() } } label: {
                     Label("Taramayı Başlat", systemImage: "shield")
-                        .font(.title3.weight(.semibold))
+                        .font(.iTitle3)
                         .padding(.horizontal, DS.Spacing.l).padding(.vertical, DS.Spacing.s)
                 }
                 .buttonStyle(.glassProminent).tint(.accentColor).controlSize(.extraLarge)
@@ -107,7 +107,7 @@ struct SecurityView: View {
                 Label("\(model.threats.count) bulgu", systemImage: "exclamationmark.triangle.fill")
                     .foregroundStyle(DS.Palette.caution)
                 if let msg = model.resultMessage {
-                    Text(msg).font(.caption).foregroundStyle(.secondary)
+                    Text(msg).font(.iCaption).foregroundStyle(.secondary)
                 }
                 Spacer()
                 Button("Tekrar Tara") { Task { await model.scan() } }.buttonStyle(.glass)
@@ -129,14 +129,14 @@ private struct ThreatRow: View {
             Image(systemName: icon).foregroundStyle(color).font(.title3).frame(width: 26)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: DS.Spacing.s) {
-                    Text(threat.title).font(.headline)
+                    Text(threat.title).font(.iHeadline)
                     Text(threat.severity.title)
-                        .font(.caption2.weight(.semibold))
+                        .font(.iCaption2.weight(.semibold))
                         .padding(.horizontal, 6).padding(.vertical, 1)
                         .glassEffect(.regular.tint(color.opacity(0.3)), in: .capsule)
                         .foregroundStyle(color)
                 }
-                Text(threat.detail).font(.callout).foregroundStyle(.secondary)
+                Text(threat.detail).font(.iCallout).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 if let p = threat.path {
                     Text(p.path).font(.dsMono).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)

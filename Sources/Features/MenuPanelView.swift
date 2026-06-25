@@ -91,8 +91,8 @@ struct MenuPanelView: View {
                 .symbolRenderingMode(.hierarchical)
                 .foregroundStyle(.tint)
             VStack(alignment: .leading, spacing: 0) {
-                Text("PureGlass").font(.headline)
-                Text("Hızlı temizlik").font(.caption).foregroundStyle(.secondary)
+                Text("PureGlass").font(.iHeadline)
+                Text("Hızlı temizlik").font(.iCaption).foregroundStyle(.secondary)
             }
             Spacer()
         }
@@ -104,13 +104,13 @@ struct MenuPanelView: View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
             HStack {
                 Label("Depolama", systemImage: "internaldrive")
-                    .font(.caption.weight(.medium)).foregroundStyle(.secondary)
+                    .font(.iCaption.weight(.medium)).foregroundStyle(.secondary)
                 Spacer()
                 Button {
                     openStorageSettings()
                 } label: {
                     Label("Sistem Ayarları", systemImage: "gearshape")
-                        .font(.caption2)
+                        .font(.iCaption2)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.tint)
@@ -129,14 +129,14 @@ struct MenuPanelView: View {
                 }
             }
             Text("Toplam \(disk.total.formattedBytes) • her saniye güncellenir")
-                .font(.caption2).foregroundStyle(.tertiary)
+                .font(.iCaption2).foregroundStyle(.tertiary)
         }
     }
 
     private func metric(_ title: String, _ value: String, _ color: Color) -> some View {
         VStack(alignment: .leading, spacing: 1) {
-            Text(title).font(.caption2).foregroundStyle(.secondary)
-            Text(value).font(.callout.weight(.semibold).monospacedDigit()).foregroundStyle(color)
+            Text(title).font(.iCaption2).foregroundStyle(.secondary)
+            Text(value).font(.iCallout.weight(.semibold).monospacedDigit()).foregroundStyle(color)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -144,11 +144,11 @@ struct MenuPanelView: View {
     private var footer: some View {
         HStack {
             Text("Lokalde çalışır • telemetri yok")
-                .font(.caption2).foregroundStyle(.tertiary)
+                .font(.iCaption2).foregroundStyle(.tertiary)
             Spacer()
             Button("Çık") { NSApp.terminate(nil) }
                 .buttonStyle(.plain)
-                .font(.caption.weight(.medium))
+                .font(.iCaption.weight(.medium))
                 .foregroundStyle(.secondary)
         }
     }

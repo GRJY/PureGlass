@@ -69,25 +69,14 @@ final class SystemMonitorViewModel {
 struct SystemMonitorView: View {
     @State private var model = SystemMonitorViewModel()
 
-    private let cols = [
-        GridItem(.flexible(), spacing: DS.Spacing.m, alignment: .top),
-        GridItem(.flexible(), spacing: DS.Spacing.m, alignment: .top)
-    ]
-
     var body: some View {
         ScrollView {
-            VStack(spacing: 0) {
-                HStack {
-                    Label("Sistem Monitörü", systemImage: "gauge.with.dots.needle.67percent")
-                        .font(.dsDisplay(30))
-                    Spacer()
-                    Text("Canlı · saniyede güncellenir").font(.caption).foregroundStyle(.secondary)
-                }
-                .padding(.bottom, DS.Spacing.m)
-
-                LazyVGrid(columns: cols, spacing: DS.Spacing.m) {
+            VStack(spacing: DS.Spacing.m) {
+                HStack(alignment: .top, spacing: DS.Spacing.m) {
                     cpuCard
                     memoryCard
+                }
+                HStack(alignment: .top, spacing: DS.Spacing.m) {
                     thermalCard
                     fanCard
                 }
@@ -103,29 +92,31 @@ struct SystemMonitorView: View {
     // MARK: - CPU
 
     private var cpuCard: some View {
-        GlassCard {
+        GlassCard(fill: true) {
             VStack(alignment: .leading, spacing: DS.Spacing.s) {
                 cardHeader("İşlemci (CPU)", "cpu", DS.Palette.accent)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(model.cpuTotal, format: .percent.precision(.fractionLength(0)))
                         .font(.dsDisplay(40)).monospacedDigit().contentTransition(.numericText())
-                    Text("kullanım").font(.caption).foregroundStyle(.secondary)
+                    Text("kullanım").font(.iCaption).foregroundStyle(.secondary)
                 }
                 ProgressView(value: model.cpuTotal).tint(DS.Palette.accent)
                 if !model.cpuPerCore.isEmpty {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 5) {
                         ForEach(Array(model.cpuPerCore.enumerated()), id: \.offset) { _, v in
-                            GeometryReader { geo in
-                                VStack {
-                                    Spacer(minLength: 0)
-                                    Capsule().fill(DS.Palette.accent.gradient)
-                                        .frame(height: max(2, geo.size.height * v))
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(DS.Palette.accent.opacity(0.16))
+                                .frame(height: 42)
+                                .overlay(alignment: .bottom) {
+                                    RoundedRectangle(cornerRadius: 3)
+                                        .fill(DS.Palette.accent.gradient)
+                                        .frame(height: max(3, 42 * v))
                                 }
-                            }
-                            .frame(height: 36)
+                                .clipShape(RoundedRectangle(cornerRadius: 3))
                         }
                     }
-                    Text("\(model.cpuPerCore.count) çekirdek").font(.caption2).foregroundStyle(.tertiary)
+                    .animation(DS.Anim.smooth, value: model.cpuPerCore)
+                    Text("\(model.cpuPerCore.count) çekirdek").font(.iCaption2).foregroundStyle(.tertiary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -134,19 +125,19 @@ struct SystemMonitorView: View {
     // MARK: - Bellek
 
     private var memoryCard: some View {
-        GlassCard {
+        GlassCard(fill: true) {
             VStack(alignment: .leading, spacing: DS.Spacing.s) {
                 cardHeader("Bellek (RAM)", "memorychip", DS.Palette.safe)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(model.memory.used.formattedBytes).font(.dsDisplay(30)).monospacedDigit()
-                    Text("/ \(model.memory.total.formattedBytes)").font(.callout).foregroundStyle(.secondary)
+                    Text("/ \(model.memory.total.formattedBytes)").font(.iCallout).foregroundStyle(.secondary)
                 }
                 ProgressView(value: model.memory.usedFraction)
                     .tint(model.memory.usedFraction > 0.9 ? DS.Palette.danger : DS.Palette.safe)
                 HStack {
-                    Text("Bellek baskısı").font(.caption).foregroundStyle(.secondary)
+                    Text("Bellek baskısı").font(.iCaption).foregroundStyle(.secondary)
                     Spacer()
-                    Text(model.memory.pressureTitle).font(.caption.weight(.semibold))
+                    Text(model.memory.pressureTitle).font(.iCaption.weight(.semibold))
                         .foregroundStyle(pressureColor)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading)
@@ -156,32 +147,36 @@ struct SystemMonitorView: View {
     // MARK: - Termal
 
     private var thermalCard: some View {
-        GlassCard {
+        GlassCard(fill: true) {
             VStack(alignment: .leading, spacing: DS.Spacing.s) {
                 cardHeader("Sıcaklık & Termal", "thermometer.medium", thermalColor)
                 HStack {
-                    Text("Termal durum").font(.callout).foregroundStyle(.secondary)
+                    Text("Termal durum").font(.iCallout).foregroundStyle(.secondary)
                     Spacer()
-                    Text(thermalTitle).font(.headline).foregroundStyle(thermalColor)
+                    Text(thermalTitle).font(.iHeadline).foregroundStyle(thermalColor)
                 }
                 Divider().opacity(0.2)
                 tempRow("CPU bölgesi", model.cpuTemp)
                 tempRow("En sıcak sensör", model.peakTemp)
                 tempRow("Batarya", model.batteryTemp)
                 if !model.hasSMC {
-                    Text("Sıcaklık sensörlerine erişilemiyor.").font(.caption2).foregroundStyle(.tertiary)
+                    Text("Sıcaklık sensörlerine erişilemiyor.").font(.iCaption2).foregroundStyle(.tertiary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
     private func tempRow(_ label: String, _ value: Double?) -> some View {
-        HStack {
-            Text(label).font(.callout)
+        HStack(spacing: DS.Spacing.s) {
+            Text(label).font(.iCallout)
             Spacer()
             if let v = value {
-                Text("\(Int(v.rounded()))°C").font(.callout.weight(.semibold).monospacedDigit())
+                Circle().fill(tempColor(v)).frame(width: 9, height: 9)
+                    .animation(DS.Anim.smooth, value: tempColor(v))
+                Text("\(Int(v.rounded()))°C")
+                    .font(.iCallout.weight(.semibold).monospacedDigit())
                     .foregroundStyle(tempColor(v))
+                    .contentTransition(.numericText())
             } else {
                 Text("—").foregroundStyle(.tertiary)
             }
@@ -191,27 +186,27 @@ struct SystemMonitorView: View {
     // MARK: - Fan
 
     private var fanCard: some View {
-        GlassCard {
+        GlassCard(fill: true) {
             VStack(alignment: .leading, spacing: DS.Spacing.s) {
                 cardHeader("Fan", "fanblades", DS.Palette.accent)
                 if let fan = model.fan {
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
                         Text("\(Int(fan.current))").font(.dsDisplay(34)).monospacedDigit().contentTransition(.numericText())
-                        Text("RPM").font(.callout).foregroundStyle(.secondary)
-                        if fan.current == 0 { Text("(boşta)").font(.caption).foregroundStyle(.tertiary) }
+                        Text("RPM").font(.iCallout).foregroundStyle(.secondary)
+                        if fan.current == 0 { Text("(boşta)").font(.iCaption).foregroundStyle(.tertiary) }
                     }
                     ProgressView(value: fan.max > 0 ? fan.current / fan.max : 0).tint(DS.Palette.accent)
                     HStack {
-                        Text("Min \(Int(fan.min)) · Maks \(Int(fan.max))").font(.caption).foregroundStyle(.secondary)
+                        Text("Min \(Int(fan.min)) · Maks \(Int(fan.max))").font(.iCaption).foregroundStyle(.secondary)
                         Spacer()
                         Text(fan.auto ? "Otomatik" : "Manuel")
-                            .font(.caption.weight(.semibold))
+                            .font(.iCaption.weight(.semibold))
                             .foregroundStyle(fan.auto ? DS.Palette.safe : DS.Palette.caution)
                     }
                     fanControls(fan)
                 } else {
                     Text("Bu Mac'te fan yok veya okunamıyor (ör. MacBook Air).")
-                        .font(.callout).foregroundStyle(.secondary)
+                        .font(.iCallout).foregroundStyle(.secondary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -221,9 +216,9 @@ struct SystemMonitorView: View {
     private func fanControls(_ fan: FanInfo) -> some View {
         if model.fanControlSupported, fan.max > fan.min {
             Divider().opacity(0.2)
-            Text("Manuel hız (yönetici parolası ister)").font(.caption.weight(.medium)).foregroundStyle(.secondary)
+            Text("Manuel hız (yönetici parolası ister)").font(.iCaption.weight(.medium)).foregroundStyle(.secondary)
             HStack {
-                Text("\(Int(model.fanTarget)) RPM").font(.callout.monospacedDigit()).frame(width: 90, alignment: .leading)
+                Text("\(Int(model.fanTarget)) RPM").font(.iCallout.monospacedDigit()).frame(width: 90, alignment: .leading)
                 Slider(value: Binding(get: { model.fanTarget }, set: { model.fanTarget = $0 }),
                        in: fan.min...fan.max, step: 50)
             }
@@ -232,25 +227,26 @@ struct SystemMonitorView: View {
                     Label("Uygula", systemImage: "wind").padding(.horizontal, 4)
                 }
                 .buttonStyle(.glassProminent).tint(.accentColor).disabled(model.fanBusy)
-                Button("Otomatik") { Task { await model.setAutoFan() } }
+                Button("Normale Dön") { Task { await model.setAutoFan() } }
                     .buttonStyle(.glass).disabled(model.fanBusy)
                 if model.fanBusy { ProgressView().controlSize(.small) }
                 Spacer()
             }
             Text("⚠️ Manuel modda fan, yük altında otomatik HIZLANMAZ. İşin bitince \"Otomatik\"e dön. (Donanım korumalı: aşırı ısınınca macOS yine de işlemciyi yavaşlatır.)")
-                .font(.caption2).foregroundStyle(DS.Palette.caution).fixedSize(horizontal: false, vertical: true)
-            if let e = model.fanError { Text(e).font(.caption2).foregroundStyle(DS.Palette.danger) }
+                .font(.iCaption2).foregroundStyle(DS.Palette.caution).fixedSize(horizontal: false, vertical: true)
+            if let e = model.fanError { Text(e).font(.iCaption2).foregroundStyle(DS.Palette.danger) }
         } else if !model.fanControlSupported {
             Divider().opacity(0.2)
             Text("Fan kontrolü bu çipte (M3+) Apple tarafından kısıtlı — yalnızca okuma.")
-                .font(.caption2).foregroundStyle(.tertiary).fixedSize(horizontal: false, vertical: true)
+                .font(.iCaption2).foregroundStyle(.tertiary).fixedSize(horizontal: false, vertical: true)
         }
     }
 
     // MARK: - Yardımcılar
 
-    private func cardHeader(_ title: String, _ symbol: String, _ color: Color) -> some View {
-        Label(title, systemImage: symbol).font(.dsTitle).foregroundStyle(color)
+    private func cardHeader(_ title: String, _ symbol: String, _ color: Color = .clear) -> some View {
+        // Tüm kart başlıkları tek tip MAVİ.
+        Label(title, systemImage: symbol).font(.dsTitle).foregroundStyle(DS.Palette.accent)
     }
 
     private var thermalTitle: String {

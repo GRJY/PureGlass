@@ -78,12 +78,12 @@ struct UninstallerView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Uygulama Kaldırıcı").font(.dsTitle)
                 Text("Bir uygulamayı çöpe atmak yetmez; geride ayar ve veri dosyaları kalır. Burası uygulamayı bu artıklarıyla birlikte eksiksiz kaldırır — önce neyi sileceğini sana gösterir.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.iCaption).foregroundStyle(.secondary)
                     .lineLimit(2)
             }
             Spacer()
             if let msg = model.resultMessage {
-                Text(msg).font(.caption).foregroundStyle(DS.Palette.safe)
+                Text(msg).font(.iCaption).foregroundStyle(DS.Palette.safe)
             }
         }
         .padding(DS.Spacing.m)
@@ -104,15 +104,15 @@ struct UninstallerView: View {
                     HStack(spacing: DS.Spacing.m) {
                         AppIcon(url: app.url)
                         VStack(alignment: .leading, spacing: 1) {
-                            Text(app.name).font(.body)
+                            Text(app.name).font(.iBody)
                             if let bid = app.bundleID {
-                                Text(bid).font(.caption2).foregroundStyle(.tertiary).lineLimit(1)
+                                Text(bid).font(.iCaption2).foregroundStyle(.tertiary).lineLimit(1)
                             }
                         }
                         Spacer()
                         Text(app.size.formattedBytes)
-                            .font(.callout.monospacedDigit()).foregroundStyle(.secondary)
-                        Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+                            .font(.iCallout.monospacedDigit()).foregroundStyle(.secondary)
+                        Image(systemName: "chevron.right").font(.iCaption).foregroundStyle(.tertiary)
                     }
                     .contentShape(Rectangle())
                 }
@@ -136,13 +136,13 @@ struct UninstallSheet: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(app.name).font(.dsTitle)
                     Text("Toplam kaldırılacak: \(model.totalRemovalSize.formattedBytes)")
-                        .font(.callout).foregroundStyle(.secondary)
+                        .font(.iCallout).foregroundStyle(.secondary)
                 }
                 Spacer()
             }
 
             VStack(alignment: .leading, spacing: DS.Spacing.xs) {
-                Text("Kaldırılacak öğeler").font(.headline)
+                Text("Kaldırılacak öğeler").font(.iHeadline)
                 ScrollView {
                     VStack(alignment: .leading, spacing: DS.Spacing.xs) {
                         itemRow(name: "\(app.name).app", path: app.url.path, size: app.size, icon: "app.fill")
@@ -159,7 +159,7 @@ struct UninstallSheet: View {
 
             if model.leftovers.isEmpty {
                 Text("Bu uygulama için ek artık bulunamadı.")
-                    .font(.caption).foregroundStyle(.tertiary)
+                    .font(.iCaption).foregroundStyle(.tertiary)
             }
 
             HStack(spacing: DS.Spacing.m) {
@@ -184,13 +184,13 @@ struct UninstallSheet: View {
 
     private func itemRow(name: String, path: String, size: Int64, icon: String) -> some View {
         HStack(spacing: DS.Spacing.s) {
-            Image(systemName: icon).font(.caption).foregroundStyle(.secondary).frame(width: 16)
+            Image(systemName: icon).font(.iCaption).foregroundStyle(.secondary).frame(width: 16)
             VStack(alignment: .leading, spacing: 1) {
-                Text(name).font(.callout).lineLimit(1)
+                Text(name).font(.iCallout).lineLimit(1)
                 Text(path).font(.dsMono).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
             }
             Spacer()
-            Text(size.formattedBytes).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+            Text(size.formattedBytes).font(.iCaption.monospacedDigit()).foregroundStyle(.secondary)
         }
     }
 }

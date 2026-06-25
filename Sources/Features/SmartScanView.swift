@@ -34,7 +34,7 @@ struct SmartScanView: View {
                     Text("Akıllı Tarama")
                         .font(.dsDisplay(40))
                     Text("Mac'ini yavaşlatan ve boşuna yer kaplayan gereksiz dosyaları bulur — uygulamaların biriktirdiği geçici dosyalar, eski kayıtlar ve önbellek.\n\nHepsini sana listeler; sen onaylamadan hiçbir şey silinmez. Silinenler de Çöp Kutusu'na gider, istersen geri alırsın.")
-                        .font(.headline)
+                        .font(.iHeadline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                 }
@@ -51,7 +51,7 @@ struct SmartScanView: View {
                     Task { await model.scan() }
                 } label: {
                     Label("Taramayı Başlat", systemImage: "magnifyingglass")
-                        .font(.title3.weight(.semibold))
+                        .font(.iTitle3)
                         .padding(.horizontal, DS.Spacing.l)
                         .padding(.vertical, DS.Spacing.s)
                 }
@@ -75,7 +75,7 @@ struct SmartScanView: View {
                 .tint(.accentColor)
 
                 Text("Sistem önbellek ve günlüklerini de tarar. Silme için **yönetici parolası** gerekir ve bu öğeler **kalıcı** silinir (sistem yeniden üretir). `/System` gibi korumalı dosyalara asla dokunulmaz.")
-                    .font(.callout)
+                    .font(.iCallout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -90,11 +90,11 @@ struct SmartScanView: View {
             ProgressRing(progress: model.scanProgress, size: 140)
             Text("Taranıyor…").font(.dsTitle)
             Text(model.scanStatusText)
-                .font(.callout)
+                .font(.iCallout)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
             Text("\(model.scanBytesFound.formattedBytes) bulundu")
-                .font(.headline.monospacedDigit())
+                .font(.iHeadline.monospacedDigit())
                 .foregroundStyle(.tint)
                 .contentTransition(.numericText())
         }
@@ -138,7 +138,7 @@ struct SmartScanView: View {
         HStack(spacing: DS.Spacing.s) {
             Image(systemName: "lock.fill").foregroundStyle(DS.Palette.caution)
             Text("\(model.lockedCategories) kategori Tam Disk Erişimi olmadan atlandı.")
-                .font(.callout)
+                .font(.iCallout)
             Spacer()
             Button("Ayarları Aç") {
                 NSWorkspace.shared.open(model.permissions.settingsURL)
@@ -180,11 +180,11 @@ struct SmartScanView: View {
 
             Image(systemName: result.category.symbolName)
                 .foregroundStyle(.tint)
-            Text(result.title).font(.headline)
+            Text(result.title).font(.iHeadline)
             RiskBadge(level: result.risk)
             Spacer()
             Text(result.totalSize.formattedBytes)
-                .font(.subheadline.weight(.semibold))
+                .font(.iSubheadline.weight(.semibold))
                 .foregroundStyle(.secondary)
         }
         .padding(.vertical, DS.Spacing.xs)
@@ -201,11 +201,11 @@ struct SmartScanView: View {
 
             Image(systemName: item.isDirectory ? "folder" : "doc")
                 .foregroundStyle(.secondary)
-                .font(.caption)
+                .font(.iCaption)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.url.lastPathComponent)
-                    .font(.callout)
+                    .font(.iCallout)
                     .lineLimit(1)
                 Text(item.url.path)
                     .font(.dsMono)
@@ -215,7 +215,7 @@ struct SmartScanView: View {
             }
             Spacer()
             Text(item.size.formattedBytes)
-                .font(.callout.monospacedDigit())
+                .font(.iCallout.monospacedDigit())
                 .foregroundStyle(.secondary)
         }
         .padding(.vertical, 2)
@@ -225,9 +225,9 @@ struct SmartScanView: View {
         HStack(spacing: DS.Spacing.m) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Seçili: \(model.totalSelectedSize.formattedBytes)")
-                    .font(.headline)
+                    .font(.iHeadline)
                 Text("Toplam bulunan: \(model.totalFoundSize.formattedBytes)")
-                    .font(.caption)
+                    .font(.iCaption)
                     .foregroundStyle(.secondary)
             }
             Spacer()
@@ -300,7 +300,7 @@ struct SmartScanView: View {
                     .tint(.accentColor)
             }
             Text("Silinenler Çöp Kutusu'nda — geri almak için sürükleyebilirsin.")
-                .font(.caption)
+                .font(.iCaption)
                 .foregroundStyle(.tertiary)
         }
         .padding(DS.Spacing.xxl)
@@ -322,7 +322,7 @@ struct SettingsView: View {
                         Label("Gizlilik", systemImage: "hand.raised")
                             .font(.dsTitle)
                         Text("PureGlass tamamen lokalde çalışır. Hiçbir veri internete gönderilmez, telemetri yoktur. Tüm silmeler Çöp Kutusu'na taşınır (geri alınabilir).")
-                            .font(.callout)
+                            .font(.iCallout)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }

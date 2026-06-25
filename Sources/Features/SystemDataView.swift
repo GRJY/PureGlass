@@ -187,11 +187,11 @@ struct SystemDataView: View {
                         .font(.dsTitle)
                     Spacer()
                     Text("\(model.snapshotCount) adet")
-                        .font(.caption.weight(.semibold))
+                        .font(.iCaption.weight(.semibold))
                         .foregroundStyle(model.snapshotCount > 0 ? DS.Palette.caution : DS.Palette.safe)
                 }
                 Text("Time Machine'in Mac'ine geçici olarak kaydettiği yedek kopyalar. Genellikle \"Sistem Verileri\"nin en büyük parçasıdır ama normal dosya gibi görünmedikleri için listede çıkmazlar. macOS bunları 24 saat içinde kendisi siler; istersen şimdi temizleyebilirsin — tamamen güvenlidir, zaten boş alan olarak sayılırlar.")
-                    .font(.callout).foregroundStyle(.secondary)
+                    .font(.iCallout).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 if model.snapshotCount > 0 {
                     Button {
@@ -215,19 +215,19 @@ struct SystemDataView: View {
                     .font(.system(size: 58, weight: .light)).symbolRenderingMode(.hierarchical).foregroundStyle(.tint)
                 Text("Sistem Verileri").font(.dsDisplay(38))
                 Text("Mac'inin Depolama ekranında gördüğün, onlarca GB yer kaplayan o gizemli \"Sistem Verileri\"nin içinde tam olarak ne var — gösterir.\nUygulama verileri, önbellekler, iOS yedekleri, geliştirici dosyaları…\n\nHer öğenin yanında renkli bir güvenlik rozeti vardır. Hiçbiri otomatik seçilmez; neyi sileceğine sen karar verirsin.")
-                    .font(.headline).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                    .font(.iHeadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
                 GlassCard {
                     HStack(spacing: DS.Spacing.m) {
-                        RiskBadge(level: .safe); Text("güvenle silinir").font(.caption).foregroundStyle(.secondary)
-                        RiskBadge(level: .caution); Text("dikkatli").font(.caption).foregroundStyle(.secondary)
-                        RiskBadge(level: .danger); Text("veri kaybı olabilir").font(.caption).foregroundStyle(.secondary)
+                        RiskBadge(level: .safe); Text("güvenle silinir").font(.iCaption).foregroundStyle(.secondary)
+                        RiskBadge(level: .caution); Text("dikkatli").font(.iCaption).foregroundStyle(.secondary)
+                        RiskBadge(level: .danger); Text("veri kaybı olabilir").font(.iCaption).foregroundStyle(.secondary)
                     }
                 }
                 .frame(maxWidth: 560)
                 snapshotCard
                 Button { Task { await model.scan() } } label: {
                     Label("Dosya-tabanlı Sistem Verilerini Tara", systemImage: "magnifyingglass")
-                        .font(.title3.weight(.semibold)).padding(.horizontal, DS.Spacing.l).padding(.vertical, DS.Spacing.s)
+                        .font(.iTitle3).padding(.horizontal, DS.Spacing.l).padding(.vertical, DS.Spacing.s)
                 }
                 .buttonStyle(.glassProminent).tint(.accentColor).controlSize(.extraLarge)
             }
@@ -239,8 +239,8 @@ struct SystemDataView: View {
         VStack(spacing: DS.Spacing.l) {
             ProgressRing(progress: model.progress, size: 140)
             Text("Sistem verileri taranıyor…").font(.dsTitle)
-            Text(model.statusText).font(.callout).foregroundStyle(.secondary).lineLimit(1)
-            Text("\(model.bytesFound.formattedBytes) bulundu").font(.headline.monospacedDigit()).foregroundStyle(.tint)
+            Text(model.statusText).font(.iCallout).foregroundStyle(.secondary).lineLimit(1)
+            Text("\(model.bytesFound.formattedBytes) bulundu").font(.iHeadline.monospacedDigit()).foregroundStyle(.tint)
         }
         .padding(DS.Spacing.xxl)
     }
@@ -273,29 +273,29 @@ struct SystemDataView: View {
             if model.protectedLoading && model.protectedResults.isEmpty {
                 HStack(spacing: DS.Spacing.s) {
                     ProgressView().controlSize(.small)
-                    Text("Korumalı alan hesaplanıyor…").font(.callout).foregroundStyle(.secondary)
+                    Text("Korumalı alan hesaplanıyor…").font(.iCallout).foregroundStyle(.secondary)
                 }
             }
             ForEach(model.protectedResults) { p in
                 HStack(spacing: DS.Spacing.s) {
-                    Image(systemName: "lock.fill").foregroundStyle(.secondary).font(.caption).frame(width: 16)
+                    Image(systemName: "lock.fill").foregroundStyle(.secondary).font(.iCaption).frame(width: 16)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(p.name).font(.callout)
+                        Text(p.name).font(.iCallout)
                         Text(p.url.path).font(.dsMono).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
                     }
                     Spacer()
-                    Text(p.size.formattedBytes).font(.callout.monospacedDigit()).foregroundStyle(.secondary)
+                    Text(p.size.formattedBytes).font(.iCallout.monospacedDigit()).foregroundStyle(.secondary)
                 }
                 .padding(.vertical, 2)
             }
         } header: {
             HStack(spacing: DS.Spacing.s) {
                 Image(systemName: "lock.shield").foregroundStyle(.secondary)
-                Text("Silinemez Sistem Verileri").font(.headline)
-                Text("macOS gerektirir").font(.caption2).foregroundStyle(.tertiary)
+                Text("Silinemez Sistem Verileri").font(.iHeadline)
+                Text("macOS gerektirir").font(.iCaption2).foregroundStyle(.tertiary)
                 Spacer()
                 if model.protectedTotal > 0 {
-                    Text(model.protectedTotal.formattedBytes).font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+                    Text(model.protectedTotal.formattedBytes).font(.iSubheadline.weight(.semibold)).foregroundStyle(.secondary)
                 }
             }
             .padding(.vertical, DS.Spacing.xs)
@@ -307,10 +307,10 @@ struct SystemDataView: View {
             Toggle(isOn: Binding(get: { model.selectionState(of: result) }, set: { _ in model.toggleCategory(result) })) { EmptyView() }
                 .toggleStyle(.checkbox).labelsHidden()
             Image(systemName: result.category.symbolName).foregroundStyle(.tint)
-            Text(result.title).font(.headline)
+            Text(result.title).font(.iHeadline)
             RiskBadge(level: result.risk)
             Spacer()
-            Text(result.totalSize.formattedBytes).font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+            Text(result.totalSize.formattedBytes).font(.iSubheadline.weight(.semibold)).foregroundStyle(.secondary)
         }
         .padding(.vertical, DS.Spacing.xs)
     }
@@ -319,13 +319,13 @@ struct SystemDataView: View {
         HStack(spacing: DS.Spacing.s) {
             Toggle(isOn: Binding(get: { model.isSelected(item) }, set: { _ in model.toggle(item) })) { EmptyView() }
                 .toggleStyle(.checkbox).labelsHidden()
-            Image(systemName: item.isDirectory ? "folder" : "doc").foregroundStyle(.secondary).font(.caption)
+            Image(systemName: item.isDirectory ? "folder" : "doc").foregroundStyle(.secondary).font(.iCaption)
             VStack(alignment: .leading, spacing: 2) {
-                Text(item.url.lastPathComponent).font(.callout).lineLimit(1)
+                Text(item.url.lastPathComponent).font(.iCallout).lineLimit(1)
                 Text(item.url.path).font(.dsMono).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
             }
             Spacer()
-            Text(item.size.formattedBytes).font(.callout.monospacedDigit()).foregroundStyle(.secondary)
+            Text(item.size.formattedBytes).font(.iCallout.monospacedDigit()).foregroundStyle(.secondary)
         }
         .padding(.vertical, 2)
     }
@@ -333,8 +333,8 @@ struct SystemDataView: View {
     private var cleanBar: some View {
         HStack(spacing: DS.Spacing.m) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Seçili: \(model.totalSelected.formattedBytes)").font(.headline)
-                Text("Toplam: \(model.totalFound.formattedBytes) • geri alınabilir (Çöp)").font(.caption).foregroundStyle(.secondary)
+                Text("Seçili: \(model.totalSelected.formattedBytes)").font(.iHeadline)
+                Text("Toplam: \(model.totalFound.formattedBytes) • geri alınabilir (Çöp)").font(.iCaption).foregroundStyle(.secondary)
             }
             Spacer()
             Button("Yeniden Tara") { Task { await model.scan() } }.buttonStyle(.glass)
@@ -372,7 +372,7 @@ struct SystemDataView: View {
                 }.frame(maxWidth: 640)
             }
             Button("Tekrar Tara") { Task { await model.scan() } }.buttonStyle(.glassProminent).tint(.accentColor)
-            Text("Silinenler Çöp Kutusu'nda — geri alabilirsin.").font(.caption).foregroundStyle(.tertiary)
+            Text("Silinenler Çöp Kutusu'nda — geri alabilirsin.").font(.iCaption).foregroundStyle(.tertiary)
         }
         .padding(DS.Spacing.xxl).frame(maxWidth: .infinity, maxHeight: .infinity)
     }

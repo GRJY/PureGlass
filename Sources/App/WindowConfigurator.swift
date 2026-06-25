@@ -12,7 +12,8 @@ struct WindowConfigurator: NSViewRepresentable {
             window.backgroundColor = .clear
             window.titlebarAppearsTransparent = true
             window.titleVisibility = .hidden
-            window.isMovableByWindowBackground = true
+            // İçeriği (kaydırıcı vb.) sürüklerken pencere kaymasın; yalnızca başlık çubuğundan taşınır.
+            window.isMovableByWindowBackground = false
             AppDelegate.shared?.registerMainWindow(window)
         }
         return view

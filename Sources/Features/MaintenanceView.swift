@@ -68,7 +68,7 @@ struct MaintenanceView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Bakım").font(.dsDisplay(32))
                     Text("Mac'in tipik sorunlarını çözen sistem bakım işlemleri. Bazıları yönetici parolası ister.")
-                        .font(.callout).foregroundStyle(.secondary)
+                        .font(.iCallout).foregroundStyle(.secondary)
                 }
                 .padding(.bottom, DS.Spacing.s)
 
@@ -97,16 +97,16 @@ struct MaintenanceView: View {
                 Image(systemName: task.symbol).font(.title2).foregroundStyle(.tint).frame(width: 34)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: DS.Spacing.s) {
-                        Text(task.title).font(.headline)
+                        Text(task.title).font(.iHeadline)
                         if task.needsAdmin {
-                            Text("parola").font(.caption2).foregroundStyle(.tertiary)
+                            Text("parola").font(.iCaption2).foregroundStyle(.tertiary)
                         }
                         if let ok = model.results[task.id] {
                             Image(systemName: ok ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                .foregroundStyle(ok ? DS.Palette.safe : DS.Palette.danger).font(.caption)
+                                .foregroundStyle(ok ? DS.Palette.safe : DS.Palette.danger).font(.iCaption)
                         }
                     }
-                    Text(task.detail).font(.callout).foregroundStyle(.secondary)
+                    Text(task.detail).font(.iCallout).foregroundStyle(.secondary)
                 }
                 Spacer()
                 Button {

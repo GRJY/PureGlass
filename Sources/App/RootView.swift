@@ -7,6 +7,7 @@ struct RootView: View {
 
     var body: some View {
         ContentView(model: model)
+            .font(.iBody)   // varsayılan: Inter
             .background(
                 WindowConfigurator().frame(width: 0, height: 0)
             )

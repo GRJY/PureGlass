@@ -19,7 +19,7 @@ struct VisualEffectView: NSViewRepresentable {
         view.material = material
         view.blendingMode = blendingMode
         view.state = .active
-        view.isEmphasized = true
+        view.isEmphasized = false   // daha az yoğun → daha şeffaf/cam
         return view
     }
 
