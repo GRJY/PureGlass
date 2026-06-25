@@ -2,11 +2,13 @@
 
 # ✨ PureGlass
 
-### The native, **real Liquid Glass** Mac cleaner — free, private, and open source.
+### The native, **real Liquid Glass** Mac cleaner **+ system monitor** — free, private, open source.
 
 PureGlass finds what wastes your space, shows you **every single file path** before touching it,
-and never sends a byte to the internet. Built from scratch in SwiftUI for **macOS 26 (Tahoe)** with
-Apple's genuine **Liquid Glass** material — not a glassmorphism fake.
+and never sends a byte to the internet. It also packs a **live system monitor** — CPU, memory,
+temperature and **fan control** (the job of Stats + Macs Fan Control, built in). One app, no telemetry.
+Built from scratch in SwiftUI for **macOS 26 (Tahoe)** with Apple's genuine **Liquid Glass** material —
+not a glassmorphism fake.
 
 ![Smart Scan](assets/01-smart-scan.png)
 
@@ -58,10 +60,11 @@ app **and** all its leftovers by bundle ID, and shows you exactly what it will r
 
 ![Uninstaller](assets/05-uninstaller.png)
 
-### 📊 System Monitor — live CPU, memory, temperature & fan
-Reads directly from the **SMC** (System Management Controller) and Mach APIs: live CPU usage
-(with per-core bars), memory pressure, **thermal state**, CPU/battery **temperature** and **fan RPM**
-— refreshed every second. No root required.
+### 📊 System Monitor — live CPU, memory, temperature & **fan control**
+Reads directly from the **SMC** (System Management Controller) and Mach APIs: a live CPU usage graph
+with **System/User breakdown**, memory pressure (matches Activity Monitor), **thermal state**, CPU/battery
+**temperature**, and **fan RPM** — refreshed live. On M1/M2 you can also **set a manual fan speed**
+(one password prompt, always reversible). No telemetry, no cloud.
 
 ![System Monitor](assets/08-system-monitor.png)
 
@@ -69,7 +72,7 @@ Reads directly from the **SMC** (System Management Controller) and Mach APIs: li
 - **Duplicate Finder** groups files by **content hash** (SHA-256, size-pre-filtered) so renamed copies are caught;
   keeps one, you trash the rest.
 - **Maintenance** runs the familiar OnyX-style system tasks (flush DNS, reindex Spotlight, rebuild Launch Services,
-  run periodic scripts, purge RAM, clear font cache…) — admin ones via a single password prompt.
+  reset the Quick Look cache, purge RAM, clear font cache…) — admin ones via a single password prompt.
 - **Browser Privacy** clears cache / history / cookies for Safari, Chrome, Firefox, Brave and Edge — to the Trash.
 
 ![Maintenance](assets/06-maintenance.png)
@@ -103,9 +106,10 @@ Reads directly from the **SMC** (System Management Controller) and Mach APIs: li
 
 **Where PureGlass leads:** the only one with **real Liquid Glass**, a **fully transparent** menu-bar panel,
 an honest **System Data breakdown** (including the undeletable part), a **full-disk treemap** (CleanMyMac has
-none), **code-signature** malware detection, and a **live per-path deletion log** — all **free, offline and
-open source**, with no telemetry. It now also matches the paid tools on duplicate finding, maintenance scripts
-and browser-privacy cleaning. *(Universal-Binary thinning is intentionally omitted — rewriting signed app
+none), **code-signature** malware detection, and a **live per-path deletion log**. On top of cleaning it adds
+a **live system monitor with fan control** (CPU/temp/RAM + manual fan RPM on M1/M2) — folding in what you'd
+otherwise pay for with Stats, iStat Menus or Macs Fan Control — all **free, offline and open source**, with no
+telemetry. It also matches the paid tools on duplicate finding, maintenance scripts and browser-privacy cleaning. *(Universal-Binary thinning is intentionally omitted — rewriting signed app
 binaries breaks their code signature and risks breaking the app.)*
 
 ---
@@ -121,7 +125,7 @@ binaries breaks their code signature and risks breaking the app.)*
 - **Menu-bar panel** — a transparent Liquid Glass panel with **live disk metrics (refreshed every second)** and
   quick actions; a "System Settings → Storage" shortcut.
 - **Duplicate Finder** — content-hash (SHA-256) duplicate detection in any folder; keep one, trash the rest.
-- **Maintenance** — OnyX-style system tasks (DNS flush, Spotlight reindex, Launch Services, periodic, purge, fonts).
+- **Maintenance** — OnyX-style system tasks (DNS flush, Spotlight reindex, Launch Services, Quick Look cache, purge, fonts).
 - **Browser Privacy** — clear cache/history/cookies for Safari, Chrome, Firefox, Brave, Edge.
 - **System Monitor** — live CPU (per-core), memory pressure, thermal state, CPU/battery temperature and fan RPM, read from the SMC + Mach APIs every second. No root.
 - **Fan control** (M1/M2) — set a manual fan RPM via a bundled root helper (one password prompt). Apple blocks fan writes on M3+, so it's read-only there — stated honestly in the UI.
