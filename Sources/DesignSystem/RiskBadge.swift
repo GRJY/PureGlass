@@ -9,6 +9,8 @@ struct RiskBadge: View {
     var body: some View {
         Label(level.title, systemImage: icon)
             .font(.iCaption.weight(.semibold))
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
             .foregroundStyle(color)
             .padding(.horizontal, DS.Spacing.s)
             .padding(.vertical, DS.Spacing.xs)

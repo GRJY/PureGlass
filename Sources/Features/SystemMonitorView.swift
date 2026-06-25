@@ -102,17 +102,17 @@ struct SystemMonitorView: View {
                 }
                 ProgressView(value: model.cpuTotal).tint(DS.Palette.accent)
                 if !model.cpuPerCore.isEmpty {
-                    HStack(spacing: 5) {
+                    HStack(alignment: .bottom, spacing: 6) {
                         ForEach(Array(model.cpuPerCore.enumerated()), id: \.offset) { _, v in
-                            RoundedRectangle(cornerRadius: 3)
-                                .fill(DS.Palette.accent.opacity(0.16))
-                                .frame(height: 42)
+                            RoundedRectangle(cornerRadius: 2.5)
+                                .fill(Color.primary.opacity(0.08))
+                                .frame(height: 46)
                                 .overlay(alignment: .bottom) {
-                                    RoundedRectangle(cornerRadius: 3)
-                                        .fill(DS.Palette.accent.gradient)
-                                        .frame(height: max(3, 42 * v))
+                                    RoundedRectangle(cornerRadius: 2.5)
+                                        .fill(DS.Palette.accent)
+                                        .frame(height: max(3, 46 * v))
                                 }
-                                .clipShape(RoundedRectangle(cornerRadius: 3))
+                                .clipShape(RoundedRectangle(cornerRadius: 2.5))
                         }
                     }
                     .animation(DS.Anim.smooth, value: model.cpuPerCore)
@@ -196,13 +196,7 @@ struct SystemMonitorView: View {
                         if fan.current == 0 { Text("(boşta)").font(.iCaption).foregroundStyle(.tertiary) }
                     }
                     ProgressView(value: fan.max > 0 ? fan.current / fan.max : 0).tint(DS.Palette.accent)
-                    HStack {
-                        Text("Min \(Int(fan.min)) · Maks \(Int(fan.max))").font(.iCaption).foregroundStyle(.secondary)
-                        Spacer()
-                        Text(fan.auto ? "Otomatik" : "Manuel")
-                            .font(.iCaption.weight(.semibold))
-                            .foregroundStyle(fan.auto ? DS.Palette.safe : DS.Palette.caution)
-                    }
+                    Text("Min \(Int(fan.min)) · Maks \(Int(fan.max))").font(.iCaption).foregroundStyle(.secondary)
                     fanControls(fan)
                 } else {
                     Text("Bu Mac'te fan yok veya okunamıyor (ör. MacBook Air).")
@@ -232,7 +226,7 @@ struct SystemMonitorView: View {
                 if model.fanBusy { ProgressView().controlSize(.small) }
                 Spacer()
             }
-            Text("⚠️ Manuel modda fan, yük altında otomatik HIZLANMAZ. İşin bitince \"Otomatik\"e dön. (Donanım korumalı: aşırı ısınınca macOS yine de işlemciyi yavaşlatır.)")
+            Text("⚠️ Manuel modda fan yük altında otomatik hızlanmaz. İşin bitince \"Normale Dön\".")
                 .font(.iCaption2).foregroundStyle(DS.Palette.caution).fixedSize(horizontal: false, vertical: true)
             if let e = model.fanError { Text(e).font(.iCaption2).foregroundStyle(DS.Palette.danger) }
         } else if !model.fanControlSupported {
