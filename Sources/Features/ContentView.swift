@@ -80,14 +80,6 @@ struct ContentView: View {
         } detail: {
             detail
                 .background(VisualEffectView(material: .fullScreenUI).ignoresSafeArea())
-                .overlay(alignment: .topTrailing) {
-                    LanguageToggle()
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .glassEffect(.regular, in: .capsule)
-                        .padding(.trailing, 10)
-                        .padding(.top, 8)
-                }
         }
         .task {
             // Opt-in QA kancası: PUREGLASS_AUTOSCAN=1 ile açılınca otomatik tara (salt-okunur).
