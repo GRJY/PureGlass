@@ -64,7 +64,9 @@ public enum SystemMetrics {
         }
         guard kr == KERN_SUCCESS else { return MemoryStats(used: 0, total: total, pressureLevel: pressure()) }
         let page = Int64(sysconf(Int32(_SC_PAGESIZE)))
-        let used = (Int64(stats.active_count) + Int64(stats.wire_count) + Int64(stats.compressor_page_count)) * page
+        // Activity Monitor "Kullanılan Bellek" = App Belleği (internal − purgeable) + Wired + Compressed.
+        let appMemory = max(0, Int64(stats.internal_page_count) - Int64(stats.purgeable_count))
+        let used = (appMemory + Int64(stats.wire_count) + Int64(stats.compressor_page_count)) * page
         return MemoryStats(used: used, total: total, pressureLevel: pressure())
     }
 

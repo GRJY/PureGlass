@@ -1,5 +1,6 @@
 import SwiftUI
 import Observation
+import AppKit
 import PureGlassKit
 
 @MainActor
@@ -44,19 +45,25 @@ final class SystemMonitorViewModel {
         guard task == nil else { return }
         _ = cpuSampler.sample()   // taban örneği
         task = Task { [weak self] in
+            var n = 0
             while !Task.isCancelled {
-                self?.refresh()
-                try? await Task.sleep(for: .seconds(1))
+                self?.sampleCPU()                       // her 0.5 sn → akıcı grafik
+                if n % 2 == 0 { self?.refreshSensors() } // her 1 sn → sıcaklık/fan stabil
+                n += 1
+                try? await Task.sleep(for: .milliseconds(500))
             }
         }
     }
 
     func stop() { task?.cancel(); task = nil }
 
-    private func refresh() {
+    private func sampleCPU() {
         let (t, pc) = cpuSampler.sample()
         cpuTotal = t
         cpuPerCore = pc
+    }
+
+    private func refreshSensors() {
         memory = SystemMetrics.memory()
         thermalState = ProcessInfo.processInfo.thermalState
         cpuTemp = smc?.cpuTemperature()
@@ -101,6 +108,7 @@ struct SystemMonitorView: View {
                     Text("kullanım").font(.iCaption).foregroundStyle(.secondary)
                 }
                 ProgressView(value: model.cpuTotal).tint(DS.Palette.accent)
+                    .animation(.linear(duration: 0.5), value: model.cpuTotal)
                 if !model.cpuPerCore.isEmpty {
                     HStack(alignment: .bottom, spacing: 6) {
                         ForEach(Array(model.cpuPerCore.enumerated()), id: \.offset) { _, v in
@@ -115,7 +123,7 @@ struct SystemMonitorView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 2.5))
                         }
                     }
-                    .animation(DS.Anim.smooth, value: model.cpuPerCore)
+                    .animation(.linear(duration: 0.5), value: model.cpuPerCore)
                     Text("\(model.cpuPerCore.count) çekirdek").font(.iCaption2).foregroundStyle(.tertiary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading)
@@ -134,12 +142,19 @@ struct SystemMonitorView: View {
                 }
                 ProgressView(value: model.memory.usedFraction)
                     .tint(model.memory.usedFraction > 0.9 ? DS.Palette.danger : DS.Palette.safe)
+                    .animation(.easeInOut(duration: 0.4), value: model.memory.usedFraction)
                 HStack {
                     Text("Bellek baskısı").font(.iCaption).foregroundStyle(.secondary)
                     Spacer()
                     Text(model.memory.pressureTitle).font(.iCaption.weight(.semibold))
                         .foregroundStyle(pressureColor)
                 }
+                Button {
+                    NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/Utilities/Activity Monitor.app"))
+                } label: {
+                    Label("Activity Monitor'da aç", systemImage: "arrow.up.forward.app").font(.iCaption)
+                }
+                .buttonStyle(.link).foregroundStyle(DS.Palette.accent)
             }.frame(maxWidth: .infinity, alignment: .leading)
         }
     }
