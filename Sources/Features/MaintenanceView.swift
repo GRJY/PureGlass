@@ -17,14 +17,15 @@ final class MaintenanceViewModel {
     var running: String?
     var results: [String: Bool] = [:]   // id -> başarılı mı
 
+    // Tüm yollar mutlak — `do shell script` ve sınırlı PATH altında çalışması için doğrulandı.
     let tasks: [MaintenanceTask] = [
-        .init(id: "dns", title: "DNS Önbelleğini Temizle", detail: "İnternet sitelerine bağlanma sorunlarını çözebilir.", symbol: "network", command: "dscacheutil -flushcache; killall -HUP mDNSResponder", needsAdmin: true),
-        .init(id: "spotlight", title: "Spotlight'ı Yeniden İndeksle", detail: "Arama sonuçları bozuksa indeksi sıfırlar.", symbol: "magnifyingglass", command: "mdutil -E /", needsAdmin: true),
-        .init(id: "launchservices", title: "Launch Services'i Yenile", detail: "'Birlikte Aç' menüsündeki yinelenen/yanlış uygulamaları düzeltir.", symbol: "app.badge.checkmark", command: "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user", needsAdmin: false),
-        .init(id: "periodic", title: "Periyodik Bakımı Çalıştır", detail: "macOS'un günlük/haftalık/aylık bakım betiklerini şimdi çalıştırır.", symbol: "calendar", command: "periodic daily weekly monthly", needsAdmin: true),
-        .init(id: "purge", title: "Belleği Boşalt (RAM)", detail: "Kullanılmayan belleği serbest bırakır.", symbol: "memorychip", command: "purge", needsAdmin: true),
-        .init(id: "fonts", title: "Font Önbelleğini Temizle", detail: "Font görüntüleme sorunlarını çözebilir.", symbol: "textformat", command: "atsutil databases -remove", needsAdmin: true),
-        .init(id: "dockfinder", title: "Dock & Finder'ı Yenile", detail: "Donan Dock/Finder'ı yeniden başlatır.", symbol: "macwindow", command: "killall Dock Finder", needsAdmin: false),
+        .init(id: "dns", title: "DNS Önbelleğini Temizle", detail: "İnternet sitelerine bağlanma sorunlarını çözebilir.", symbol: "network", command: "/usr/bin/dscacheutil -flushcache; /usr/bin/killall -HUP mDNSResponder", needsAdmin: true),
+        .init(id: "spotlight", title: "Spotlight'ı Yeniden İndeksle", detail: "Arama sonuçları bozuksa indeksi sıfırlar.", symbol: "magnifyingglass", command: "/usr/bin/mdutil -E /", needsAdmin: true),
+        .init(id: "launchservices", title: "Launch Services'i Yenile", detail: "'Birlikte Aç' menüsündeki yinelenen/yanlış uygulamaları düzeltir.", symbol: "app.badge.checkmark", command: "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -r -domain local -domain system -domain user", needsAdmin: false),
+        .init(id: "quicklook", title: "Quick Look Önbelleğini Sıfırla", detail: "Boşluk tuşuyla önizlemeler bozuksa düzeltir.", symbol: "eye", command: "/usr/bin/qlmanage -r cache", needsAdmin: false),
+        .init(id: "purge", title: "Belleği Boşalt (RAM)", detail: "Kullanılmayan belleği serbest bırakır.", symbol: "memorychip", command: "/usr/sbin/purge", needsAdmin: true),
+        .init(id: "fonts", title: "Font Önbelleğini Temizle", detail: "Font görüntüleme sorunlarını çözebilir.", symbol: "textformat", command: "/usr/bin/atsutil databases -remove", needsAdmin: true),
+        .init(id: "dockfinder", title: "Dock & Finder'ı Yenile", detail: "Donan Dock/Finder'ı yeniden başlatır.", symbol: "macwindow", command: "/usr/bin/killall Dock Finder", needsAdmin: false),
     ]
 
     func run(_ task: MaintenanceTask) async {
@@ -78,6 +79,15 @@ struct MaintenanceView: View {
             .padding(DS.Spacing.xxl)
             .frame(maxWidth: 760)
             .frame(maxWidth: .infinity)
+        }
+        .task {
+            // QA: PUREGLASS_RUNMAINT=<id> ile bir görevi otomatik çalıştırıp sonucu yaz.
+            if let id = ProcessInfo.processInfo.environment["PUREGLASS_RUNMAINT"],
+               let task = model.tasks.first(where: { $0.id == id }) {
+                await model.run(task)
+                let res = model.results[id] == true ? "OK" : "FAIL"
+                try? res.write(toFile: "/tmp/pg_maint.txt", atomically: true, encoding: .utf8)
+            }
         }
     }
 
