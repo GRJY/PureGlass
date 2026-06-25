@@ -15,18 +15,18 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
 
     var id: String { rawValue }
 
-    var title: String {
+    @MainActor var title: String {
         switch self {
-        case .smartScan: "Akıllı Tarama"
-        case .systemData: "Sistem Verileri"
-        case .monitor: "Sistem Monitörü"
-        case .security: "Güvenlik Taraması"
-        case .privacy: "Tarayıcı Gizliliği"
-        case .uninstaller: "Uygulama Kaldırıcı"
-        case .duplicates: "Yinelenen Dosyalar"
-        case .spaceLens: "Disk Haritası"
-        case .maintenance: "Bakım"
-        case .settings: "Ayarlar"
+        case .smartScan: L("Akıllı Tarama", "Smart Scan")
+        case .systemData: L("Sistem Verileri", "System Data")
+        case .monitor: L("Sistem Monitörü", "System Monitor")
+        case .security: L("Güvenlik Taraması", "Security Scan")
+        case .privacy: L("Tarayıcı Gizliliği", "Browser Privacy")
+        case .uninstaller: L("Uygulama Kaldırıcı", "App Uninstaller")
+        case .duplicates: L("Yinelenen Dosyalar", "Duplicate Files")
+        case .spaceLens: L("Disk Haritası", "Disk Map")
+        case .maintenance: L("Bakım", "Maintenance")
+        case .settings: L("Ayarlar", "Settings")
         }
     }
 
@@ -77,6 +77,14 @@ struct ContentView: View {
         } detail: {
             detail
                 .background(VisualEffectView(material: .fullScreenUI).ignoresSafeArea())
+                .overlay(alignment: .topTrailing) {
+                    LanguageToggle()
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .glassEffect(.regular, in: .capsule)
+                        .padding(.trailing, 16)
+                        .padding(.top, 12)
+                }
         }
         .task {
             // Opt-in QA kancası: PUREGLASS_AUTOSCAN=1 ile açılınca otomatik tara (salt-okunur).
