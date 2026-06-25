@@ -14,6 +14,8 @@ public enum ScanCategory: String, Sendable, CaseIterable, Codable {
     case browserData
     case appLeftovers
     case largeOldFiles
+    case applicationData
+    case containers
 
     public var title: String {
         switch self {
@@ -28,6 +30,8 @@ public enum ScanCategory: String, Sendable, CaseIterable, Codable {
         case .browserData: return "Tarayıcı Verileri"
         case .appLeftovers: return "Uygulama Artıkları"
         case .largeOldFiles: return "Büyük & Eski Dosyalar"
+        case .applicationData: return "Uygulama Verileri"
+        case .containers: return "Konteynerler"
         }
     }
 
@@ -44,6 +48,8 @@ public enum ScanCategory: String, Sendable, CaseIterable, Codable {
         case .browserData: return "safari"
         case .appLeftovers: return "app.badge"
         case .largeOldFiles: return "externaldrive.badge.exclamationmark"
+        case .applicationData: return "app.dashed"
+        case .containers: return "shippingbox.fill"
         }
     }
 
@@ -56,6 +62,8 @@ public enum ScanCategory: String, Sendable, CaseIterable, Codable {
             return .caution
         case .largeOldFiles:
             return .caution
+        case .applicationData, .containers:
+            return .danger   // gerçek uygulama verisi — silmek veri kaybı olabilir
         }
     }
 }

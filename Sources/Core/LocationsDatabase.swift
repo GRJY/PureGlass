@@ -39,6 +39,8 @@ public struct CleanLocation: Identifiable, Sendable, Hashable {
 /// FAZ 6'da kategoriler genişletilecek; burası kasıtlı olarak genişlemeye açık.
 public struct LocationsDatabase: Sendable {
     public let locations: [CleanLocation]
+    /// "Sistem Verileri" geniş dökümü (risk-sınıflı, manuel temizlik için).
+    public let systemData: [CleanLocation]
 
     public init(home: URL = FileManager.default.homeDirectoryForCurrentUser) {
         var l: [CleanLocation] = []
@@ -112,6 +114,37 @@ public struct LocationsDatabase: Sendable {
             "Sistem günlükleri; root gerektirir.")
 
         self.locations = l
+
+        // --- "Sistem Verileri" geniş döküm (risk-sınıflı, MANUEL temizlik için) ---
+        // macOS'un "Sistem Verileri" kategorisini oluşturan büyük katkıları gösterir.
+        var sd: [CleanLocation] = []
+        func addSD(_ id: String, _ category: ScanCategory, _ title: String,
+                   _ relativeToHome: String? = nil, absolute: String? = nil,
+                   risk: RiskLevel = .safe, root: Bool = false, _ details: String) {
+            let url = relativeToHome != nil ? home.appending(path: relativeToHome!) : URL(filePath: absolute!)
+            sd.append(CleanLocation(id: id, category: category, title: title, url: url, risk: risk,
+                                    requiresFullDiskAccess: true, requiresRoot: root, details: details))
+        }
+        addSD("sd.user.cache", .userCache, "Kullanıcı Önbelleği", "Library/Caches", risk: .safe,
+              "Geçici önbellek; uygulamalar yeniden üretir.")
+        addSD("sd.user.logs", .userLogs, "Kullanıcı Günlükleri", "Library/Logs", risk: .safe,
+              "Uygulama günlükleri; güvenle silinebilir.")
+        addSD("sd.trash", .trash, "Çöp Kutusu", ".Trash", risk: .safe, "Çöp kutusu içeriği.")
+        addSD("sd.developer", .developerJunk, "Geliştirici (Xcode vb.)", "Library/Developer", risk: .caution,
+              "DerivedData, DeviceSupport, Simulators, Arşivler.")
+        addSD("sd.mail", .mailAttachments, "Mail", "Library/Mail", risk: .caution,
+              "Mail verileri ve indirilen ekler.")
+        addSD("sd.containers", .containers, "Konteynerler", "Library/Containers", risk: .danger,
+              "Sandbox'lı uygulama verileri — silersen o uygulamanın verisi kaybolur.")
+        addSD("sd.groupcontainers", .containers, "Grup Konteynerleri", "Library/Group Containers", risk: .danger,
+              "Paylaşılan uygulama grubu verileri.")
+        addSD("sd.appsupport", .applicationData, "Uygulama Verileri", "Library/Application Support", risk: .danger,
+              "Uygulamaların kalıcı verileri (iOS yedekleri dahil). Dikkatli seç.")
+        addSD("sd.system.cache", .systemCache, "Sistem Önbelleği", absolute: "/Library/Caches", risk: .caution, root: true,
+              "Sistem geneli önbellek (root gerekir).")
+        addSD("sd.system.logs", .systemLogs, "Sistem Günlükleri", absolute: "/private/var/log", risk: .caution, root: true,
+              "Sistem günlükleri (root gerekir).")
+        self.systemData = sd
     }
 
     /// Yalnızca root gerektirmeyen (kullanıcı alanı) konumlar.

@@ -3,6 +3,7 @@ import SwiftUI
 /// Kenar çubuğu hedefleri.
 enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
     case smartScan
+    case systemData
     case security
     case uninstaller
     case spaceLens
@@ -13,6 +14,7 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
     var title: String {
         switch self {
         case .smartScan: "Akıllı Tarama"
+        case .systemData: "Sistem Verileri"
         case .security: "Güvenlik Taraması"
         case .uninstaller: "Uygulama Kaldırıcı"
         case .spaceLens: "Disk Haritası"
@@ -23,6 +25,7 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
     var symbol: String {
         switch self {
         case .smartScan: "sparkles"
+        case .systemData: "macwindow.on.rectangle"
         case .security: "shield.lefthalf.filled"
         case .uninstaller: "trash.square"
         case .spaceLens: "chart.pie"
@@ -39,9 +42,8 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             List(SidebarItem.allCases, selection: $model.selectedSection) { item in
-                NavigationLink(value: item) {
-                    Label(item.title, systemImage: item.symbol)
-                }
+                Label(item.title, systemImage: item.symbol)
+                    .tag(item)
             }
             .navigationTitle("PureGlass")
             .scrollContentBackground(.hidden)
@@ -63,6 +65,8 @@ struct ContentView: View {
         switch model.selectedSection ?? .smartScan {
         case .smartScan:
             SmartScanView(model: model)
+        case .systemData:
+            SystemDataView()
         case .security:
             SecurityView()
         case .settings:
