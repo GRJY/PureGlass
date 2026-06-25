@@ -43,6 +43,9 @@ struct SmartScanView: View {
                         .frame(maxWidth: 560)
                 }
 
+                deepCleanCard
+                    .frame(maxWidth: 560)
+
                 Button {
                     Task { await model.scan() }
                 } label: {
@@ -57,6 +60,25 @@ struct SmartScanView: View {
             }
             .padding(DS.Spacing.xxl)
             .frame(maxWidth: .infinity)
+        }
+    }
+
+    private var deepCleanCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: DS.Spacing.s) {
+                Toggle(isOn: $model.deepClean) {
+                    Label("Derin Sistem Temizliği", systemImage: "shield.lefthalf.filled")
+                        .font(.dsTitle)
+                }
+                .toggleStyle(.switch)
+                .tint(.accentColor)
+
+                Text("Sistem önbellek ve günlüklerini de tarar. Silme için **yönetici parolası** gerekir ve bu öğeler **kalıcı** silinir (sistem yeniden üretir). `/System` gibi korumalı dosyalara asla dokunulmaz.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 

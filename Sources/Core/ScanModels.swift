@@ -12,10 +12,13 @@ public struct FileItem: Identifiable, Sendable, Hashable {
     public let modificationDate: Date?
     public let category: ScanCategory
     public let risk: RiskLevel
+    /// Silmek için yönetici (root) yetkisi gerekiyor mu (sistem konumları).
+    public let requiresRoot: Bool
 
     public init(
         url: URL, size: Int64, isDirectory: Bool, fileCount: Int,
-        modificationDate: Date?, category: ScanCategory, risk: RiskLevel
+        modificationDate: Date?, category: ScanCategory, risk: RiskLevel,
+        requiresRoot: Bool = false
     ) {
         self.url = url
         self.size = size
@@ -24,6 +27,7 @@ public struct FileItem: Identifiable, Sendable, Hashable {
         self.modificationDate = modificationDate
         self.category = category
         self.risk = risk
+        self.requiresRoot = requiresRoot
     }
 }
 

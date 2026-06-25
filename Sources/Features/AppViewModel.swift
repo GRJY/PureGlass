@@ -14,6 +14,7 @@ final class AppViewModel {
     let scanEngine = ScanEngine()
     let permissions = PermissionCoordinator()
     private let cleaningEngine: CleaningEngine
+    private let privilegedCleaner: PrivilegedCleaner
 
     var phase: Phase = .idle
     var results: [CategoryScanResult] = []
@@ -25,8 +26,12 @@ final class AppViewModel {
     var logLines: [LogLine] = []
     var report: CleanReport?
 
+    /// Derin sistem temizliği (root öğeleri de tarar/temizler; yönetici parolası gerekir).
+    var deepClean = false
+
     init() {
         cleaningEngine = CleaningEngine(safety: SafetyGuard(database: database))
+        privilegedCleaner = PrivilegedCleaner(database: database)
     }
 
     // MARK: - Türetilmiş değerler
@@ -72,7 +77,7 @@ final class AppViewModel {
         scanProgress = 0
         scanStatusText = "Başlatılıyor…"
 
-        let locations = database.userSpaceLocations
+        let locations = deepClean ? database.locations : database.userSpaceLocations
         let scanned = await scanEngine.scan(locations) { [weak self] progress in
             await MainActor.run {
                 self?.scanProgress = progress.fraction
@@ -94,14 +99,49 @@ final class AppViewModel {
         guard !selectedItems.isEmpty else { return }
         phase = .cleaning
         logLines = []
-        let items = selectedItems
-        let finalReport = await cleaningEngine.clean(items) { [weak self] event in
-            await MainActor.run {
-                self?.logLines.append(LogLine(event: event))
+
+        let rootItems = selectedItems.filter(\.requiresRoot)
+        let userItems = selectedItems.filter { !$0.requiresRoot }
+
+        // 1) Kullanıcı alanı → Çöp'e (trash-first).
+        let userReport = await cleaningEngine.clean(userItems) { [weak self] event in
+            await MainActor.run { self?.logLines.append(LogLine(event: event)) }
+        }
+        var events = userReport.events
+
+        // 2) Sistem (root) öğeleri → tek yönetici parolası istemiyle kalıcı sil.
+        if !rootItems.isEmpty {
+            events += await cleanPrivileged(rootItems)
+        }
+
+        report = CleanReport(events: events)
+        phase = .done
+    }
+
+    /// Root öğelerini doğrular, tek bir yetkili komutla siler, olayları döndürür.
+    private func cleanPrivileged(_ items: [FileItem]) async -> [CleanEvent] {
+        let (valid, skipped) = privilegedCleaner.partition(items)
+        var events: [CleanEvent] = skipped.map {
+            CleanEvent(url: $0.url, size: $0.size, outcome: .skippedUnsafe("Sistem güvenli alanı dışında"))
+        }
+        skipped.forEach { logLines.append(LogLine(event: CleanEvent(url: $0.url, size: $0.size, outcome: .skippedUnsafe("güvensiz")))) }
+
+        guard let command = privilegedCleaner.buildCommand(for: valid.map(\.url)) else { return events }
+        do {
+            try AdminShell.run(command)   // @MainActor — parola istemi
+            for item in valid {
+                let e = CleanEvent(url: item.url, size: item.size, outcome: .trashed)
+                events.append(e)
+                logLines.append(LogLine(event: e))
+            }
+        } catch {
+            for item in valid {
+                let e = CleanEvent(url: item.url, size: item.size, outcome: .failed(error.localizedDescription))
+                events.append(e)
+                logLines.append(LogLine(event: e))
             }
         }
-        report = finalReport
-        phase = .done
+        return events
     }
 
     func reset() {

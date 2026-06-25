@@ -14,7 +14,9 @@ hiçbir veri internete gitmez, telemetri yoktur ve **her silinen dosyanın tam y
 - **Akıllı Tarama** — önbellek, günlük, geçici dosya ve geliştirici artıklarını (Xcode DerivedData, npm, vb.) tarar.
 - **Her dosya yolu görünür** — silmeden önce tam yol + boyut + risk rozeti (yeşil/sarı/kırmızı) ile listelenir.
 - **Canlı silme logu** — her dosya Çöp'e taşınırken yolu anlık akar.
-- **Trash-first** — hiçbir şey kalıcı silinmez; her şey geri alınabilir Çöp Kutusu'na gider.
+- **Trash-first** — kullanıcı dosyaları kalıcı silinmez; geri alınabilir Çöp Kutusu'na gider.
+- **Derin Sistem Temizliği** (opsiyonel) — sistem önbellek/günlüklerini de temizler; tek
+  yönetici parolası istemiyle, ayrı ve daha katı bir güvenlik kapısından geçerek.
 - **Şeffaf Liquid Glass arayüz** — macOS 26 (Tahoe) cam efektleri.
 - **Tam offline** — telemetri/ağ erişimi yok.
 
@@ -80,15 +82,23 @@ Tests/            PureGlassKit birim testleri (güvenlik/tarama/temizlik/izin)
 ## Dürüst Sınır: "Sistem dosyalarına kadar derin temizlik"
 
 macOS'ta **SIP korumalı gerçek sistem dosyaları (`/System` vb.) hiçbir araçla silinemez**
-(CleanMyMac dahil; root bile silemez, FDA bunu geçemez). PureGlass'in "derin temizliği":
-erişilebilir kullanıcı/sistem önbellek-günlük alanları + (ileride) root-yetkili XPC helper
-ile root-sahipli cache'ler. UI bunu dürüstçe belirtir.
+(CleanMyMac dahil; root bile silemez, FDA bunu geçemez). PureGlass'in "Derin Sistem
+Temizliği": erişilebilir **root-sahipli önbellek/günlük** alanlarını (örn. `/Library/Caches`,
+`/private/var/log`) yönetici parolasıyla siler — `/System` gibi korumalı dosyalara asla
+dokunmaz. UI bunu dürüstçe belirtir.
+
+### Root temizlik nasıl çalışır (FAZ 9)
+Ücretli Developer ID gerektiren `SMAppService`/XPC daemon yerine, imzasız uygulamalarda da
+çalışan **`NSAppleScript ... with administrator privileges`** kullanılır (tek seferlik sistem
+parola istemi). Güvenlik: root komutu yalnızca **yalnız sistem-cache/log köklerini içeren ayrı
+bir `SafetyGuard`'dan** geçen yollar için kurulur; tek-tırnak kaçışı + `rm -rf --` ile kabuk
+enjeksiyonu engellenir. Bu mantık birim testlerle (gerçek komut çalıştırılarak) doğrulanmıştır.
 
 ## İleride (opsiyonel)
 
 - **Notarization** (geniş dağıtım için): ücretli Apple Developer hesabı gerektirir.
   Gerektiğinde: `ENABLE_HARDENED_RUNTIME=YES` + Developer ID ile imza + `notarytool submit`.
-- Uninstaller (çok-seviyeli app eşleştirme), Disk Haritası (treemap), root temizlik (FAZ 9).
+- Uninstaller (çok-seviyeli app eşleştirme), Disk Haritası (treemap).
 
 ## Lisans / Gizlilik
 

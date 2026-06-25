@@ -10,6 +10,12 @@ public struct CleanEvent: Sendable, Equatable {
     public let url: URL
     public let size: Int64
     public let outcome: Outcome
+
+    public init(url: URL, size: Int64, outcome: Outcome) {
+        self.url = url
+        self.size = size
+        self.outcome = outcome
+    }
 }
 
 /// Bir temizlik turunun özeti.
@@ -21,6 +27,11 @@ public struct CleanReport: Sendable {
     public private(set) var events: [CleanEvent] = []
 
     public init() {}
+
+    /// Olay listesinden bir rapor oluşturur (kullanıcı + root temizlik raporlarını birleştirmek için).
+    public init(events: [CleanEvent]) {
+        for event in events { record(event) }
+    }
 
     mutating func record(_ event: CleanEvent) {
         events.append(event)

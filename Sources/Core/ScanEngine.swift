@@ -83,7 +83,8 @@ public struct ScanEngine: Sendable {
             items.append(FileItem(
                 url: child, size: size, isDirectory: directory, fileCount: count,
                 modificationDate: rv.contentModificationDate,
-                category: location.category, risk: location.risk
+                category: location.category, risk: location.risk,
+                requiresRoot: location.requiresRoot
             ))
         }
         return result(location, items: items, accessible: true)
