@@ -5,6 +5,7 @@ import PureGlassKit
 /// Akıllı Tarama akışı: tara → sonuçlar (yol+boyut+risk, seçim) → Çöp'e taşı → canlı log → özet.
 struct SmartScanView: View {
     @Bindable var model: AppViewModel
+    @State private var showConfirm = false
 
     var body: some View {
         Group {
@@ -86,7 +87,7 @@ struct SmartScanView: View {
 
     private var scanning: some View {
         VStack(spacing: DS.Spacing.l) {
-            ProgressRing(progress: model.scanProgress, size: 140)
+            ProgressRing(progress: model.scanProgress, size: 140, animating: true)
             Text("Taranıyor…").font(.dsTitle)
             Text(model.scanStatusText)
                 .font(.callout)
@@ -124,6 +125,12 @@ struct SmartScanView: View {
                 .scrollContentBackground(.hidden)
             }
             cleanBar
+        }
+        .alert("Bu işlem geri alınamayabilir", isPresented: $showConfirm) {
+            Button("Sil", role: .destructive) { Task { await model.clean() } }
+            Button("Vazgeç", role: .cancel) {}
+        } message: {
+            Text("Seçiminde riskli (sarı/kırmızı) öğeler var. Sistem (kırmızı) öğeleri KALICI silinir ve geri alınamaz. Silmek istediğine emin misin?")
         }
     }
 
@@ -227,7 +234,7 @@ struct SmartScanView: View {
             Button("Yeniden Tara") { Task { await model.scan() } }
                 .buttonStyle(.glass)
             Button {
-                Task { await model.clean() }
+                if model.hasRiskySelection { showConfirm = true } else { Task { await model.clean() } }
             } label: {
                 Label("Çöp'e Taşı", systemImage: "trash")
                     .padding(.horizontal, DS.Spacing.s)

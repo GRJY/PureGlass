@@ -25,6 +25,25 @@ final class SystemDataViewModel {
     var snapshotCount = 0
     var snapshotBusy = false
 
+    var protectedResults: [DiskMapEntry] = []
+    var protectedLoading = false
+    var protectedTotal: Int64 { protectedResults.reduce(0) { $0 + $1.size } }
+
+    /// macOS'un çalışması için gerekli, silinemez korumalı alanlar.
+    private let protectedLocations: [(String, String)] = [
+        ("Sistem Çerçeveleri", "/System/Library/Frameworks"),
+        ("Özel Sistem Çerçeveleri", "/System/Library/PrivateFrameworks"),
+        ("Yerleşik Uygulamalar", "/System/Applications"),
+        ("Sistem Veritabanları", "/private/var/db"),
+        ("Sistem Kütüphaneleri", "/usr/lib"),
+        ("Apple Sistem İçeriği", "/Library/Apple"),
+    ]
+
+    /// Seçimde sarı (dikkat) veya kırmızı (riskli) öğe var mı?
+    var hasRiskySelection: Bool {
+        selectedItems.contains { $0.risk == .caution || $0.risk == .danger }
+    }
+
     init() {
         // Geniş SafetyGuard: sistem-veri köklerinin ALT öğeleri silinebilir (hepsi trash-first / geri alınabilir).
         cleaningEngine = CleaningEngine(safety: SafetyGuard(allowedRoots: database.systemData.map(\.url)))
@@ -69,6 +88,32 @@ final class SystemDataViewModel {
         }
         results = scanned.filter { $0.isAccessible && !$0.items.isEmpty }
         phase = .results
+        Task { await measureProtected() }   // silinemez alanı arka planda hesapla (engellemez)
+    }
+
+    func measureProtected() async {
+        protectedLoading = true
+        protectedResults = []
+        let scanner = DiskMapScanner()
+        await withTaskGroup(of: DiskMapEntry?.self) { group in
+            for (title, path) in protectedLocations {
+                group.addTask {
+                    let url = URL(filePath: path)
+                    guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+                    let kids = await scanner.children(of: url)
+                    let total = kids.reduce(Int64(0)) { $0 + $1.size }
+                    guard total > 0 else { return nil }
+                    return DiskMapEntry(url: url, name: title, size: total, isDirectory: true, fileCount: 0)
+                }
+            }
+            for await entry in group {
+                if let entry {
+                    protectedResults.append(entry)
+                    protectedResults.sort { $0.size > $1.size }
+                }
+            }
+        }
+        protectedLoading = false
     }
 
     func clean() async {
@@ -107,6 +152,7 @@ final class SystemDataViewModel {
 
 struct SystemDataView: View {
     @State private var model = SystemDataViewModel()
+    @State private var showConfirm = false
 
     var body: some View {
         Group {
@@ -183,7 +229,7 @@ struct SystemDataView: View {
 
     private var scanning: some View {
         VStack(spacing: DS.Spacing.l) {
-            ProgressRing(progress: model.progress, size: 140)
+            ProgressRing(progress: model.progress, size: 140, animating: true)
             Text("Sistem verileri taranıyor…").font(.dsTitle)
             Text(model.statusText).font(.callout).foregroundStyle(.secondary).lineLimit(1)
             Text("\(model.bytesFound.formattedBytes) bulundu").font(.headline.monospacedDigit()).foregroundStyle(.tint)
@@ -199,9 +245,52 @@ struct SystemDataView: View {
                         ForEach(result.items) { item in itemRow(item) }
                     } header: { categoryHeader(result) }
                 }
+                protectedSection
             }
             .scrollContentBackground(.hidden)
             cleanBar
+        }
+        .alert("Bu işlem geri alınamayabilir", isPresented: $showConfirm) {
+            Button("Sil", role: .destructive) { Task { await model.clean() } }
+            Button("Vazgeç", role: .cancel) {}
+        } message: {
+            Text("Seçiminde riskli (sarı/kırmızı) öğeler var. Kırmızı sistem öğeleri KALICI silinir ve geri alınamaz. Silmek istediğine emin misin?")
+        }
+    }
+
+    /// Read-only: macOS'un silinemeyen korumalı alanları (yanında boyut).
+    @ViewBuilder
+    private var protectedSection: some View {
+        Section {
+            if model.protectedLoading && model.protectedResults.isEmpty {
+                HStack(spacing: DS.Spacing.s) {
+                    ProgressView().controlSize(.small)
+                    Text("Korumalı alan hesaplanıyor…").font(.callout).foregroundStyle(.secondary)
+                }
+            }
+            ForEach(model.protectedResults) { p in
+                HStack(spacing: DS.Spacing.s) {
+                    Image(systemName: "lock.fill").foregroundStyle(.secondary).font(.caption).frame(width: 16)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(p.name).font(.callout)
+                        Text(p.url.path).font(.dsMono).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
+                    }
+                    Spacer()
+                    Text(p.size.formattedBytes).font(.callout.monospacedDigit()).foregroundStyle(.secondary)
+                }
+                .padding(.vertical, 2)
+            }
+        } header: {
+            HStack(spacing: DS.Spacing.s) {
+                Image(systemName: "lock.shield").foregroundStyle(.secondary)
+                Text("Silinemez Sistem Verileri").font(.headline)
+                Text("macOS gerektirir").font(.caption2).foregroundStyle(.tertiary)
+                Spacer()
+                if model.protectedTotal > 0 {
+                    Text(model.protectedTotal.formattedBytes).font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+                }
+            }
+            .padding(.vertical, DS.Spacing.xs)
         }
     }
 
@@ -241,7 +330,9 @@ struct SystemDataView: View {
             }
             Spacer()
             Button("Yeniden Tara") { Task { await model.scan() } }.buttonStyle(.glass)
-            Button { Task { await model.clean() } } label: {
+            Button {
+                if model.hasRiskySelection { showConfirm = true } else { Task { await model.clean() } }
+            } label: {
                 Label("Çöp'e Taşı", systemImage: "trash").padding(.horizontal, DS.Spacing.s)
             }
             .buttonStyle(.glassProminent).tint(DS.Palette.danger).disabled(model.selectedItems.isEmpty)

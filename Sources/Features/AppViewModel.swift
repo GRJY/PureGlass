@@ -50,6 +50,11 @@ final class AppViewModel {
         selectedItems.reduce(0) { $0 + $1.size }
     }
 
+    /// Seçimde sarı (dikkat) veya kırmızı (riskli) öğe var mı?
+    var hasRiskySelection: Bool {
+        selectedItems.contains { $0.risk == .caution || $0.risk == .danger }
+    }
+
     func isSelected(_ item: FileItem) -> Bool { selectedURLs.contains(item.url) }
 
     func toggle(_ item: FileItem) {
