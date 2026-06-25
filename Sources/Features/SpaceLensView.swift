@@ -49,6 +49,14 @@ struct SpaceLensView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            Button {
+                NSWorkspace.shared.open(current)
+            } label: {
+                Label("Finder'da Aç", systemImage: "arrow.up.forward.app")
+            }
+            .buttonStyle(.glass)
+            .controlSize(.small)
+            .help("Bu klasörü (\(current.path)) Finder'da aç")
         }
         .padding(DS.Spacing.m)
     }
