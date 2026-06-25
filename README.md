@@ -86,6 +86,7 @@ Reads directly from the **SMC** (System Management Controller) and Mach APIs: li
 | **Real Liquid Glass UI** (macOS 26) | ✅ **Only PureGlass** | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Transparent menu-bar panel + live disk** | ✅ | menu only | ✅ | ❌ | ❌ | ❌ |
 | **Live system monitor** (CPU/temp/fan, SMC) | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **Fan control** (manual RPM, M1/M2) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Smart Scan (one-click)** | ✅ | ✅ | ✅ | ❌ | partial | ❌ |
 | **System Junk** | ✅ | ✅ | ✅ | — | ✅ | limited |
 | **System Data breakdown + undeletable sizes** | ✅ **Unique** | ❌ | ❌ | ❌ | ❌ | ❌ |
@@ -123,6 +124,7 @@ binaries breaks their code signature and risks breaking the app.)*
 - **Maintenance** — OnyX-style system tasks (DNS flush, Spotlight reindex, Launch Services, periodic, purge, fonts).
 - **Browser Privacy** — clear cache/history/cookies for Safari, Chrome, Firefox, Brave, Edge.
 - **System Monitor** — live CPU (per-core), memory pressure, thermal state, CPU/battery temperature and fan RPM, read from the SMC + Mach APIs every second. No root.
+- **Fan control** (M1/M2) — set a manual fan RPM via a bundled root helper (one password prompt). Apple blocks fan writes on M3+, so it's read-only there — stated honestly in the UI.
 - **Live deletion log** — every path scrolls by as it's trashed.
 - **Risk badges** everywhere (🟢 safe · 🟡 caution · 🔴 risky) and a confirmation prompt before any risky delete.
 - **Deep clean** (optional) — system caches/logs via a single admin-password prompt; system items are validated
@@ -192,7 +194,7 @@ Tests/            79 unit tests (safety, scan, clean, signing, treemap, duplicat
 
 ## Roadmap
 
-- **Fan control** (manual RPM, M1/M2 only — Apple blocks it on M3+) · English/i18n · simulator-runtime cleanup via `simctl`.
+- English / multi-language localization · simulator-runtime cleanup via `simctl` · scheduled background scans · per-core P/E labelling.
 
 ## License
 
