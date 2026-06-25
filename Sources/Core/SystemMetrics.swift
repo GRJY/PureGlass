@@ -1,19 +1,29 @@
 import Foundation
 import Darwin
 
-/// CPU kullanımı (toplam + çekirdek başına). Ardışık örnekler arasındaki tick farkından hesaplar.
+/// CPU kullanım anlık görüntüsü (Activity Monitor kırılımına denk: Kullanıcı = user+nice).
+public struct CPUUsage: Sendable, Equatable {
+    public let total: Double    // busy = user + system (0...1)
+    public let user: Double     // kullanıcı + nice
+    public let system: Double
+    public let perCore: [Double]
+    public var idle: Double { max(0, 1 - total) }
+    public static let zero = CPUUsage(total: 0, user: 0, system: 0, perCore: [])
+}
+
+/// CPU kullanımı. Ardışık örnekler arasındaki tick farkından hesaplar.
 public final class CPUUsageSampler {
     private var previous: [UInt32]?
 
     public init() {}
 
-    /// (toplam 0...1, çekirdek başına [0...1]). İlk çağrı taban oluşturur → (0, []).
-    public func sample() -> (total: Double, perCore: [Double]) {
+    /// İlk çağrı taban oluşturur → .zero.
+    public func sample() -> CPUUsage {
         var cpuInfo: processor_info_array_t?
         var numCpuInfo: mach_msg_type_number_t = 0
         var numCpus: natural_t = 0
         let err = host_processor_info(mach_host_self(), PROCESSOR_CPU_LOAD_INFO, &numCpus, &cpuInfo, &numCpuInfo)
-        guard err == KERN_SUCCESS, let info = cpuInfo else { return (0, []) }
+        guard err == KERN_SUCCESS, let info = cpuInfo else { return .zero }
         defer {
             vm_deallocate(mach_task_self_, vm_address_t(bitPattern: info),
                           vm_size_t(numCpuInfo) * vm_size_t(MemoryLayout<integer_t>.stride))
@@ -25,19 +35,23 @@ public final class CPUUsageSampler {
         for i in 0..<(n * states) { ticks[i] = UInt32(bitPattern: info[i]) }
 
         var perCore = [Double](repeating: 0, count: n)
-        var totalBusy = 0.0, totalAll = 0.0
+        var totalBusy = 0.0, totalAll = 0.0, totalUser = 0.0, totalSystem = 0.0
         if let prev = previous, prev.count == ticks.count {
             for c in 0..<n {
                 let base = c * states
                 func d(_ s: Int32) -> Double { Double(ticks[base + Int(s)] &- prev[base + Int(s)]) }
-                let busy = d(CPU_STATE_USER) + d(CPU_STATE_SYSTEM) + d(CPU_STATE_NICE)
+                let user = d(CPU_STATE_USER) + d(CPU_STATE_NICE)
+                let sys = d(CPU_STATE_SYSTEM)
+                let busy = user + sys
                 let all = busy + d(CPU_STATE_IDLE)
                 perCore[c] = all > 0 ? busy / all : 0
-                totalBusy += busy; totalAll += all
+                totalBusy += busy; totalAll += all; totalUser += user; totalSystem += sys
             }
         }
         previous = ticks
-        return (totalAll > 0 ? totalBusy / totalAll : 0, perCore)
+        guard totalAll > 0 else { return CPUUsage(total: 0, user: 0, system: 0, perCore: perCore) }
+        return CPUUsage(total: totalBusy / totalAll, user: totalUser / totalAll,
+                        system: totalSystem / totalAll, perCore: perCore)
     }
 }
 

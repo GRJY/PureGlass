@@ -16,10 +16,12 @@ final class SystemMetricsTests: XCTestCase {
         // küçük bir iş yap
         var x = 0.0; for i in 0..<200_000 { x += Double(i).squareRoot() }
         _ = x
-        let (total, perCore) = s.sample()
-        XCTAssertTrue((0...1).contains(total))
-        XCTAssertFalse(perCore.isEmpty)
-        XCTAssertTrue(perCore.allSatisfy { (0...1).contains($0) })
+        let u = s.sample()
+        XCTAssertTrue((0...1).contains(u.total))
+        XCTAssertTrue((0...1).contains(u.user))
+        XCTAssertTrue((0...1).contains(u.system))
+        XCTAssertFalse(u.perCore.isEmpty)
+        XCTAssertTrue(u.perCore.allSatisfy { (0...1).contains($0) })
     }
 
     func testMemoryPressureValid() {

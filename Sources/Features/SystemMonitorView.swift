@@ -1,7 +1,14 @@
 import SwiftUI
 import Observation
 import AppKit
+import Charts
 import PureGlassKit
+
+/// CPU geçmiş grafiği için tek nokta.
+struct CPUPoint: Identifiable, Equatable {
+    let id: Int
+    let value: Double
+}
 
 @MainActor
 @Observable
@@ -11,7 +18,11 @@ final class SystemMonitorViewModel {
     private var task: Task<Void, Never>?
 
     var cpuTotal: Double = 0
+    var cpuUser: Double = 0
+    var cpuSystem: Double = 0
     var cpuPerCore: [Double] = []
+    var cpuHistory: [CPUPoint] = []
+    private var cpuSampleIndex = 0
     var memory = SystemMetrics.memory()
     var thermalState: ProcessInfo.ThermalState = .nominal
     var cpuTemp: Double?
@@ -58,9 +69,14 @@ final class SystemMonitorViewModel {
     func stop() { task?.cancel(); task = nil }
 
     private func sampleCPU() {
-        let (t, pc) = cpuSampler.sample()
-        cpuTotal = t
-        cpuPerCore = pc
+        let u = cpuSampler.sample()
+        cpuTotal = u.total
+        cpuUser = u.user
+        cpuSystem = u.system
+        cpuPerCore = u.perCore
+        cpuHistory.append(CPUPoint(id: cpuSampleIndex, value: u.total))
+        cpuSampleIndex += 1
+        if cpuHistory.count > 60 { cpuHistory.removeFirst() }
     }
 
     private func refreshSensors() {
@@ -106,27 +122,48 @@ struct SystemMonitorView: View {
                     Text(model.cpuTotal, format: .percent.precision(.fractionLength(0)))
                         .font(.dsDisplay(40)).monospacedDigit().contentTransition(.numericText())
                     Text("kullanım").font(.iCaption).foregroundStyle(.secondary)
-                }
-                ProgressView(value: model.cpuTotal).tint(DS.Palette.accent)
-                    .animation(.linear(duration: 0.5), value: model.cpuTotal)
-                if !model.cpuPerCore.isEmpty {
-                    HStack(alignment: .bottom, spacing: 6) {
-                        ForEach(Array(model.cpuPerCore.enumerated()), id: \.offset) { _, v in
-                            RoundedRectangle(cornerRadius: 2.5)
-                                .fill(Color.primary.opacity(0.08))
-                                .frame(height: 46)
-                                .overlay(alignment: .bottom) {
-                                    RoundedRectangle(cornerRadius: 2.5)
-                                        .fill(DS.Palette.accent)
-                                        .frame(height: max(3, 46 * v))
-                                }
-                                .clipShape(RoundedRectangle(cornerRadius: 2.5))
-                        }
-                    }
-                    .animation(.linear(duration: 0.5), value: model.cpuPerCore)
+                    Spacer()
                     Text("\(model.cpuPerCore.count) çekirdek").font(.iCaption2).foregroundStyle(.tertiary)
                 }
+
+                cpuHistoryChart
+
+                HStack(spacing: DS.Spacing.l) {
+                    cpuLegend("Sistem", model.cpuSystem, DS.Palette.danger)
+                    cpuLegend("Kullanıcı", model.cpuUser, DS.Palette.accent)
+                    cpuLegend("Boş", 1 - model.cpuTotal, .secondary)
+                }
             }.frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var cpuHistoryChart: some View {
+        Chart(model.cpuHistory) { p in
+            AreaMark(x: .value("t", p.id), y: .value("cpu", p.value))
+                .interpolationMethod(.catmullRom)
+                .foregroundStyle(.linearGradient(
+                    colors: [DS.Palette.accent.opacity(0.45), DS.Palette.accent.opacity(0.04)],
+                    startPoint: .top, endPoint: .bottom))
+            LineMark(x: .value("t", p.id), y: .value("cpu", p.value))
+                .interpolationMethod(.catmullRom)
+                .foregroundStyle(DS.Palette.accent)
+                .lineStyle(StrokeStyle(lineWidth: 2))
+        }
+        .chartXScale(domain: (model.cpuHistory.first?.id ?? 0)...(max((model.cpuHistory.first?.id ?? 0) + 1, model.cpuHistory.last?.id ?? 1)))
+        .chartYScale(domain: 0...1)
+        .chartXAxis(.hidden)
+        .chartYAxis(.hidden)
+        .frame(height: 64)
+        .animation(.linear(duration: 0.5), value: model.cpuHistory)
+    }
+
+    private func cpuLegend(_ label: String, _ value: Double, _ color: Color) -> some View {
+        HStack(spacing: 5) {
+            Circle().fill(color).frame(width: 7, height: 7)
+            Text(label).font(.iCaption2).foregroundStyle(.secondary)
+            Text(value, format: .percent.precision(.fractionLength(0)))
+                .font(.iCaption.weight(.semibold).monospacedDigit())
+                .contentTransition(.numericText())
         }
     }
 
