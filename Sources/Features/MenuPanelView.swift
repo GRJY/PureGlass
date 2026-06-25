@@ -20,7 +20,7 @@ final class DiskMonitor {
         refresh()
         task = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(5))
+                try? await Task.sleep(for: .seconds(1))   // ucuz statfs sorgusu; sistemi yormaz
                 self?.refresh()
             }
         }
@@ -128,7 +128,7 @@ struct MenuPanelView: View {
                     metric("Boşaltılabilir", disk.purgeable.formattedBytes, DS.Palette.accent)
                 }
             }
-            Text("Toplam \(disk.total.formattedBytes) • her 5 sn'de güncellenir")
+            Text("Toplam \(disk.total.formattedBytes) • her saniye güncellenir")
                 .font(.caption2).foregroundStyle(.tertiary)
         }
     }

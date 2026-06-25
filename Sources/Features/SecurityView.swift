@@ -58,7 +58,7 @@ struct SecurityView: View {
                     Text(msg).font(.caption).foregroundStyle(.secondary)
                 }
             }
-            Text("Zararlı yazılım, şüpheli kalıcı görevler ve hosts ele geçirmesi için sezgisel tarama. Bulut antivirüs değildir; tamamen lokalde çalışır.")
+            Text("Kalıcılık konumlarını (launch agent/daemon, ~/.zshrc, cron, emond, hosts) tarar ve her çalıştırılabilir öğenin KOD İMZASINI doğrular (KnockKnock yaklaşımı). Apple/Developer-ID imzalı öğeler güvenilir sayılır; imzasız/ad-hoc/bozuk imzalı kalıcı öğeler işaretlenir. Lokalde çalışır; bulut antivirüs değildir.")
                 .font(.caption).foregroundStyle(.tertiary)
                 .fixedSize(horizontal: false, vertical: true)
         }
