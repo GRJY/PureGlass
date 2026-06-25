@@ -27,43 +27,18 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
         }
     }
 
-    var available: Bool {
-        switch self {
-        case .smartScan, .settings, .spaceLens: true
-        case .uninstaller: false   // yakında
-        }
-    }
 }
 
 /// Ana pencere: glass kenar çubuğu + detay.
 struct ContentView: View {
-    @State private var model = AppViewModel()
-    @State private var selection: SidebarItem?
-
-    init() {
-        // Opt-in QA kancası: PUREGLASS_START=spaceLens ile doğrudan Disk Haritası'nda açılır.
-        let start = ProcessInfo.processInfo.environment["PUREGLASS_START"]
-        _selection = State(initialValue: start == "spaceLens" ? .spaceLens : .smartScan)
-    }
+    @Bindable var model: AppViewModel
 
     var body: some View {
         NavigationSplitView {
-            List(SidebarItem.allCases, selection: $selection) { item in
+            List(SidebarItem.allCases, selection: $model.selectedSection) { item in
                 NavigationLink(value: item) {
-                    Label {
-                        HStack {
-                            Text(item.title)
-                            if !item.available {
-                                Text("Yakında")
-                                    .font(.caption2)
-                                    .foregroundStyle(.tertiary)
-                            }
-                        }
-                    } icon: {
-                        Image(systemName: item.symbol)
-                    }
+                    Label(item.title, systemImage: item.symbol)
                 }
-                .disabled(!item.available)
             }
             .navigationTitle("PureGlass")
             .scrollContentBackground(.hidden)
@@ -82,7 +57,7 @@ struct ContentView: View {
 
     @ViewBuilder
     private var detail: some View {
-        switch selection ?? .smartScan {
+        switch model.selectedSection ?? .smartScan {
         case .smartScan:
             SmartScanView(model: model)
         case .settings:
@@ -90,38 +65,7 @@ struct ContentView: View {
         case .spaceLens:
             SpaceLensView()
         case .uninstaller:
-            ComingSoonView(title: "Uygulama Kaldırıcı",
-                           symbol: "trash.square",
-                           detail: "Uygulamaları tüm artıklarıyla (container, prefs, cache, login item) birlikte kaldırma. Çok-seviyeli eşleştirme motoru ile yakında.")
+            UninstallerView()
         }
-    }
-}
-
-/// Henüz gelmemiş özellikler için dürüst yer tutucu.
-struct ComingSoonView: View {
-    let title: String
-    let symbol: String
-    let detail: String
-
-    var body: some View {
-        VStack(spacing: DS.Spacing.m) {
-            Image(systemName: symbol)
-                .font(.system(size: 56, weight: .light))
-                .symbolRenderingMode(.hierarchical)
-                .foregroundStyle(.tint)
-            Text(title).font(.dsDisplay(32))
-            Text(detail)
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: 420)
-            Text("Yakında")
-                .font(.caption.weight(.semibold))
-                .padding(.horizontal, DS.Spacing.m)
-                .padding(.vertical, DS.Spacing.xs)
-                .glassEffect(.regular.tint(DS.Palette.caution.opacity(0.3)), in: .capsule)
-        }
-        .padding(DS.Spacing.xxl)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

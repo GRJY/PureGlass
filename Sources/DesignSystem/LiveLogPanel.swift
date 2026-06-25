@@ -63,11 +63,8 @@ struct LiveLogPanel: View {
             }
         }
         .frame(height: height)
-        .background(.black.opacity(0.28), in: .rect(cornerRadius: DS.Radius.m))
-        .overlay(
-            RoundedRectangle(cornerRadius: DS.Radius.m)
-                .strokeBorder(.white.opacity(0.08), lineWidth: 1)
-        )
+        // Gerçek Liquid Glass (koyu tint ile okunabilirlik).
+        .glassEffect(.regular.tint(.black.opacity(0.35)), in: .rect(cornerRadius: DS.Radius.m))
     }
 
     private func row(_ line: LogLine) -> some View {

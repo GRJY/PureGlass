@@ -1,10 +1,12 @@
 import SwiftUI
 
 /// Uygulama kök görünümü: glass kenar çubuğu + detay (ContentView),
-/// şeffaf pencere ayarıyla.
+/// şeffaf pencere ayarıyla. Durum yukarıdan (App) paylaşılır.
 struct RootView: View {
+    let model: AppViewModel
+
     var body: some View {
-        ContentView()
+        ContentView(model: model)
             .background(
                 WindowConfigurator().frame(width: 0, height: 0)
             )
@@ -12,6 +14,6 @@ struct RootView: View {
 }
 
 #Preview {
-    RootView()
+    RootView(model: AppViewModel())
         .frame(width: 1000, height: 700)
 }

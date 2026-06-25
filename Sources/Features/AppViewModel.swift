@@ -16,6 +16,10 @@ final class AppViewModel {
     private let cleaningEngine: CleaningEngine
     private let privilegedCleaner: PrivilegedCleaner
 
+    /// Kenar çubuğu seçimi (menü çubuğu paneliyle paylaşılır → derin bağlantı).
+    var selectedSection: SidebarItem? =
+        (ProcessInfo.processInfo.environment["PUREGLASS_START"] == "spaceLens") ? .spaceLens : .smartScan
+
     var phase: Phase = .idle
     var results: [CategoryScanResult] = []
     var selectedURLs: Set<URL> = []

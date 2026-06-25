@@ -13,6 +13,7 @@ struct WindowConfigurator: NSViewRepresentable {
             window.titlebarAppearsTransparent = true
             window.titleVisibility = .hidden
             window.isMovableByWindowBackground = true
+            AppDelegate.shared?.registerMainWindow(window)
         }
         return view
     }

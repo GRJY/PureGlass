@@ -142,7 +142,9 @@ struct SmartScanView: View {
         }
         .padding(.horizontal, DS.Spacing.l)
         .padding(.vertical, DS.Spacing.s)
-        .background(DS.Palette.caution.opacity(0.12))
+        .glassEffect(.regular.tint(DS.Palette.caution.opacity(0.28)), in: .capsule)
+        .padding(.horizontal, DS.Spacing.m)
+        .padding(.top, DS.Spacing.s)
     }
 
     private var emptyResults: some View {
@@ -235,7 +237,10 @@ struct SmartScanView: View {
             .disabled(model.selectedItems.isEmpty)
         }
         .padding(DS.Spacing.l)
-        .background(.ultraThinMaterial)
+        // Yüzen gerçek Liquid Glass çubuk.
+        .glassEffect(.regular, in: .rect(cornerRadius: DS.Radius.l))
+        .padding(.horizontal, DS.Spacing.m)
+        .padding(.bottom, DS.Spacing.m)
     }
 
     // MARK: - Temizlik (canlı log)
