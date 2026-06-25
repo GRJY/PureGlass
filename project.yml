@@ -29,6 +29,12 @@ targets:
     dependencies:
       - target: PureGlassKit
         embed: true
+      - target: pgsmc          # build sırası için (Contents/MacOS'a postBuild ile kopyalanır)
+    postBuildScripts:
+      - name: Embed pgsmc helper
+        script: |
+          cp "${BUILT_PRODUCTS_DIR}/pgsmc" "${TARGET_BUILD_DIR}/${EXECUTABLE_FOLDER_PATH}/pgsmc"
+          codesign --force --sign - "${TARGET_BUILD_DIR}/${EXECUTABLE_FOLDER_PATH}/pgsmc"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.giray.pureglass
@@ -44,6 +50,16 @@ targets:
         LD_RUNPATH_SEARCH_PATHS:
           - "$(inherited)"
           - "@executable_path/../Frameworks"
+
+  pgsmc:
+    type: tool
+    platform: macOS
+    sources:
+      - path: Sources/Helper
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.giray.pureglass.pgsmc
+        CODE_SIGN_IDENTITY: "-"
 
   PureGlassKit:
     type: framework

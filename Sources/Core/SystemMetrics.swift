@@ -68,6 +68,21 @@ public enum SystemMetrics {
         return MemoryStats(used: used, total: total, pressureLevel: pressure())
     }
 
+    public static func cpuBrand() -> String {
+        var size = 0
+        sysctlbyname("machdep.cpu.brand_string", nil, &size, nil, 0)
+        guard size > 0 else { return "" }
+        var buf = [CChar](repeating: 0, count: size)
+        sysctlbyname("machdep.cpu.brand_string", &buf, &size, nil, 0)
+        return String(cString: buf)
+    }
+
+    /// Fan kontrolü yalnızca M1/M2'de güvenilir (Apple M3+'da "korumalı mod" ile blokluyor).
+    public static var fanControlSupported: Bool {
+        let b = cpuBrand()
+        return b.contains("M1") || b.contains("M2")
+    }
+
     public static func pressure() -> Int {
         var level: Int32 = 1
         var size = MemoryLayout<Int32>.size

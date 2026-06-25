@@ -19,6 +19,27 @@ final class SystemMonitorViewModel {
     var fan: FanInfo?
     var hasSMC: Bool { smc != nil }
 
+    // Fan kontrolü (yalnızca M1/M2)
+    let fanControlSupported = SystemMetrics.fanControlSupported
+    var fanManual = false
+    var fanTarget: Double = 2500
+    var fanBusy = false
+    var fanError: String?
+
+    func applyManualFan() async {
+        fanBusy = true; fanError = nil
+        do { try FanController.setManual(rpm: Int(fanTarget)); fanManual = true }
+        catch { fanError = error.localizedDescription }
+        fanBusy = false
+    }
+
+    func setAutoFan() async {
+        fanBusy = true; fanError = nil
+        do { try FanController.setAuto(); fanManual = false }
+        catch { fanError = error.localizedDescription }
+        fanBusy = false
+    }
+
     func start() {
         guard task == nil else { return }
         _ = cpuSampler.sample()   // taban örneği
@@ -173,11 +194,42 @@ struct SystemMonitorView: View {
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(fan.auto ? DS.Palette.safe : DS.Palette.caution)
                     }
+                    fanControls(fan)
                 } else {
                     Text("Bu Mac'te fan yok veya okunamıyor (ör. MacBook Air).")
                         .font(.callout).foregroundStyle(.secondary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    @ViewBuilder
+    private func fanControls(_ fan: FanInfo) -> some View {
+        if model.fanControlSupported, fan.max > fan.min {
+            Divider().opacity(0.2)
+            Text("Manuel hız (yönetici parolası ister)").font(.caption.weight(.medium)).foregroundStyle(.secondary)
+            HStack {
+                Text("\(Int(model.fanTarget)) RPM").font(.callout.monospacedDigit()).frame(width: 90, alignment: .leading)
+                Slider(value: Binding(get: { model.fanTarget }, set: { model.fanTarget = $0 }),
+                       in: fan.min...fan.max, step: 50)
+            }
+            HStack(spacing: DS.Spacing.s) {
+                Button { Task { await model.applyManualFan() } } label: {
+                    Label("Uygula", systemImage: "wind").padding(.horizontal, 4)
+                }
+                .buttonStyle(.glassProminent).tint(.accentColor).disabled(model.fanBusy)
+                Button("Otomatik") { Task { await model.setAutoFan() } }
+                    .buttonStyle(.glass).disabled(model.fanBusy)
+                if model.fanBusy { ProgressView().controlSize(.small) }
+                Spacer()
+            }
+            Text("⚠️ Manuel modda fan, yük altında otomatik HIZLANMAZ. İşin bitince \"Otomatik\"e dön. (Donanım korumalı: aşırı ısınınca macOS yine de işlemciyi yavaşlatır.)")
+                .font(.caption2).foregroundStyle(DS.Palette.caution).fixedSize(horizontal: false, vertical: true)
+            if let e = model.fanError { Text(e).font(.caption2).foregroundStyle(DS.Palette.danger) }
+        } else if !model.fanControlSupported {
+            Divider().opacity(0.2)
+            Text("Fan kontrolü bu çipte (M3+) Apple tarafından kısıtlı — yalnızca okuma.")
+                .font(.caption2).foregroundStyle(.tertiary).fixedSize(horizontal: false, vertical: true)
         }
     }
 
