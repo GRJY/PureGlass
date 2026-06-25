@@ -146,11 +146,12 @@ struct TreemapView: View {
         GeometryReader { geo in
             let rect = CGRect(origin: .zero, size: geo.size)
             let frames = squarifiedTreemap(weights: entries.map { Double($0.size) }, in: rect)
+            let maxSize = entries.map(\.size).max() ?? 1
             ZStack(alignment: .topLeading) {
                 ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
                     let f = frames[index]
                     if f.width > 3, f.height > 3 {
-                        TreemapTile(entry: entry, color: color(for: entry), size: f.size)
+                        TreemapTile(entry: entry, color: color(for: entry, maxSize: maxSize), size: f.size)
                             .frame(width: f.width, height: f.height)
                             .offset(x: f.minX, y: f.minY)
                             .onTapGesture { onTap(entry) }
@@ -163,11 +164,14 @@ struct TreemapView: View {
         }
     }
 
-    /// Ada göre kararlı renk (her açılışta aynı).
-    private func color(for entry: DiskMapEntry) -> Color {
-        let sum = entry.name.unicodeScalars.reduce(0) { $0 &+ Int($1.value) }
-        let hue = Double(sum % 360) / 360.0
-        return Color(hue: hue, saturation: 0.5, brightness: 0.85)
+    /// Boyut-ısı haritası: çok dolu → kırmızı, orta → sarı, boşa yakın → yeşil.
+    /// En büyük öğeye göre normalize; orta tonları belirginleştirmek için kare-kök eğrisi.
+    private func color(for entry: DiskMapEntry, maxSize: Int64) -> Color {
+        guard maxSize > 0 else { return Color(hue: 0.33, saturation: 0.9, brightness: 0.85) }
+        let t = pow(Double(entry.size) / Double(maxSize), 0.5)   // 0 (küçük) … 1 (en büyük)
+        // Yeşil (120°) → sarı (60°) → kırmızı (0°)
+        let hue = (1 - min(max(t, 0), 1)) * 120.0 / 360.0
+        return Color(hue: hue, saturation: 0.92, brightness: 0.95)
     }
 }
 
