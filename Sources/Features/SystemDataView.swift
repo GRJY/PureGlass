@@ -166,7 +166,12 @@ struct SystemDataView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .animation(DS.Anim.smooth, value: model.phase)
-        .task { model.refreshSnapshots() }
+        .task {
+            model.refreshSnapshots()
+            if ProcessInfo.processInfo.environment["PUREGLASS_AUTOSCAN"] == "1", model.phase == .idle {
+                await model.scan()
+            }
+        }
     }
 
     /// Time Machine yerel anlık görüntüleri — "Sistem Verileri"nin en büyük gizli bileşeni.
