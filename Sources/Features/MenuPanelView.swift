@@ -113,6 +113,7 @@ enum PanelTab: String, CaseIterable, Identifiable {
 struct MenuPanelView: View {
     let model: AppViewModel
     var onOpenMain: () -> Void = {}
+    var onSize: (CGSize) -> Void = { _ in }
 
     @State private var disk = DiskMonitor()
     @State private var sys = PanelMetrics()
@@ -132,15 +133,23 @@ struct MenuPanelView: View {
                 case .fan: fanTab
                 }
             }
-            .animation(.easeInOut(duration: 0.2), value: tab)
+            .frame(maxWidth: .infinity, alignment: .top)
 
             Divider().opacity(0.3)
             footer
         }
         .padding(DS.Spacing.l)
         .frame(width: 320)
+        .fixedSize(horizontal: false, vertical: true)
         .glassEffect(.regular, in: .rect(cornerRadius: 22))
         .padding(10)
+        .background(
+            GeometryReader { p in
+                Color.clear
+                    .onAppear { onSize(p.size) }
+                    .onChange(of: p.size) { _, s in onSize(s) }
+            }
+        )
         .task { disk.start(); sys.start() }
         .onDisappear { disk.stop(); sys.stop() }
     }
@@ -195,7 +204,16 @@ struct MenuPanelView: View {
 
     private var systemTab: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.m) {
-            systemMetrics
+            meterRow("İşlemci", "cpu", "%\(Int((sys.cpu * 100).rounded()))",
+                     value: sys.cpu, tint: DS.Palette.accent)
+            meterRow("Bellek", "memorychip", sys.memUsed.formattedBytes,
+                     value: sys.memFraction, tint: sys.memFraction > 0.9 ? DS.Palette.danger : DS.Palette.safe)
+
+            HStack(spacing: DS.Spacing.m) {
+                metric("Sıcaklık", sys.temp.map { "\(Int($0.rounded()))°" } ?? "—", tempColor(sys.temp))
+                metric("Fan", sys.fan.map { "\(Int($0)) RPM" } ?? "—", .primary)
+            }
+
             VStack(spacing: 2) {
                 row("Sistem Monitörü'nü Aç", "gauge.with.dots.needle.67percent") {
                     model.selectedSection = .monitor; onOpenMain()
@@ -204,6 +222,21 @@ struct MenuPanelView: View {
                     model.selectedSection = .maintenance; onOpenMain()
                 }
             }
+        }
+    }
+
+    /// Etiket + değer + ilerleme çubuğu (CPU/Bellek için).
+    private func meterRow(_ title: String, _ symbol: String, _ value: String, value fraction: Double, tint: Color) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Label(title, systemImage: symbol).font(.iCaption.weight(.medium)).foregroundStyle(.secondary)
+                Spacer()
+                Text(value).font(.iCallout.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(tint == DS.Palette.safe ? .primary : tint)
+                    .contentTransition(.numericText())
+            }
+            ProgressView(value: min(max(fraction, 0), 1)).tint(tint)
+                .animation(.easeInOut(duration: 0.4), value: fraction)
         }
     }
 
@@ -301,17 +334,6 @@ struct MenuPanelView: View {
     }
 
     // MARK: - Canlı sistem metrikleri (CPU/Bellek/Sıcaklık/Fan)
-
-    private var systemMetrics: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.s) {
-            HStack(spacing: DS.Spacing.m) {
-                metric("İşlemci", "%\(Int((sys.cpu * 100).rounded()))", DS.Palette.accent)
-                metric("Bellek", sys.memUsed.formattedBytes, .primary)
-                metric("Sıcaklık", sys.temp.map { "\(Int($0.rounded()))°" } ?? "—", tempColor(sys.temp))
-                metric("Fan", sys.fan.map { "\(Int($0))" } ?? "—", .primary)
-            }
-        }
-    }
 
     private func tempColor(_ t: Double?) -> Color {
         guard let t else { return .secondary }

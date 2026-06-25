@@ -50,15 +50,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 final class StatusBarController: NSObject {
     private let statusItem: NSStatusItem
     private let panel: NSPanel
+    private let host: NSHostingView<MenuPanelView>
     private var monitor: Any?
 
     init(model: AppViewModel) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
-        let host = NSHostingView(rootView: MenuPanelView(model: model, onOpenMain: {
-            AppDelegate.shared?.openMain()
-        }))
+        host = NSHostingView(rootView: MenuPanelView(model: model))
         host.frame = CGRect(origin: .zero, size: host.fittingSize)
+        host.autoresizingMask = [.width, .minYMargin]   // panel boyu değişince üst kenara sabit kal
 
         panel = NSPanel(
             contentRect: host.frame,
@@ -75,6 +75,14 @@ final class StatusBarController: NSObject {
         panel.contentView = host
 
         super.init()
+
+        // Gerçek closure'ları bağla: ana pencereyi aç + sekme değişince paneli
+        // yumuşak animasyonla yeniden boyutlandır (üst kenar sabit).
+        host.rootView = MenuPanelView(
+            model: model,
+            onOpenMain: { AppDelegate.shared?.openMain() },
+            onSize: { [weak self] size in self?.resizePanel(to: size) }
+        )
 
         if let button = statusItem.button {
             button.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: "PureGlass")
@@ -109,5 +117,28 @@ final class StatusBarController: NSObject {
     private func hide() {
         panel.orderOut(nil)
         if let m = monitor { NSEvent.removeMonitor(m); monitor = nil }
+    }
+
+    /// İçerik yüksekliği değişince paneli yumuşak animasyonla yeniden boyutlandırır.
+    /// Üst kenar sabit kalır (panel menü çubuğundan aşağı sarkar).
+    private func resizePanel(to size: CGSize) {
+        guard size.width > 1, size.height > 1 else { return }
+        guard panel.isVisible else {
+            host.frame = CGRect(origin: .zero, size: size)
+            panel.setContentSize(size)
+            return
+        }
+
+        let topY = panel.frame.maxY
+        var f = panel.frame
+        f.size = size
+        f.origin.y = topY - size.height          // üst kenarı sabitle
+        // host'u son boyutuna getir, panel içeriğinin üstüne yapıştır (minYMargin korur).
+        host.frame = CGRect(x: 0, y: panel.frame.height - size.height, width: size.width, height: size.height)
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = 0.24
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            panel.animator().setFrame(f, display: true)
+        }
     }
 }

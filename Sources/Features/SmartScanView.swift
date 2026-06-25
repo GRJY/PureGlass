@@ -33,10 +33,11 @@ struct SmartScanView: View {
                         .foregroundStyle(.tint)
                     Text("Akıllı Tarama")
                         .font(.dsDisplay(40))
-                    Text("Mac'ini yavaşlatan ve boşuna yer kaplayan gereksiz dosyaları bulur — uygulamaların biriktirdiği geçici dosyalar, eski kayıtlar ve önbellek.\n\nHepsini sana listeler; sen onaylamadan hiçbir şey silinmez. Silinenler de Çöp Kutusu'na gider, istersen geri alırsın.")
-                        .font(.iHeadline)
+                    Text("Uygulamaların biriktirdiği geçici dosya, önbellek ve eski kayıtları bulur. Onaylamadan hiçbir şey silinmez; silinenler Çöp'e gider.")
+                        .font(.iCallout)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
+                        .frame(maxWidth: 460)
                 }
 
                 if !model.permissions.isGranted {

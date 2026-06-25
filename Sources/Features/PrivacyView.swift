@@ -59,7 +59,7 @@ struct PrivacyView: View {
                 Image(systemName: "hand.raised").font(.system(size: 58, weight: .light)).symbolRenderingMode(.hierarchical).foregroundStyle(.tint)
                 Text("Tarayıcı Gizliliği").font(.dsDisplay(34))
                 Text("Safari, Chrome, Firefox, Brave ve Edge'in önbellek, geçmiş ve çerez verilerini bulup temizler. Her şey Çöp'e gider (geri alınabilir).")
-                    .font(.iHeadline).foregroundStyle(.secondary).multilineTextAlignment(.center).frame(maxWidth: 540)
+                    .font(.iCallout).foregroundStyle(.secondary).multilineTextAlignment(.center).frame(maxWidth: 460)
                 Button { Task { await model.scan() } } label: {
                     Label("Tarayıcıları Tara", systemImage: "magnifyingglass").font(.iTitle3).padding(.horizontal, DS.Spacing.l).padding(.vertical, DS.Spacing.s)
                 }.buttonStyle(.glassProminent).tint(.accentColor).controlSize(.extraLarge)

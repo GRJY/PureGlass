@@ -214,8 +214,8 @@ struct SystemDataView: View {
                 Image(systemName: "macwindow.on.rectangle")
                     .font(.system(size: 58, weight: .light)).symbolRenderingMode(.hierarchical).foregroundStyle(.tint)
                 Text("Sistem Verileri").font(.dsDisplay(38))
-                Text("Mac'inin Depolama ekranında gördüğün, onlarca GB yer kaplayan o gizemli \"Sistem Verileri\"nin içinde tam olarak ne var — gösterir.\nUygulama verileri, önbellekler, iOS yedekleri, geliştirici dosyaları…\n\nHer öğenin yanında renkli bir güvenlik rozeti vardır. Hiçbiri otomatik seçilmez; neyi sileceğine sen karar verirsin.")
-                    .font(.iHeadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                Text("Depolama'daki gizemli \"Sistem Verileri\"nin içinde ne var, gösterir: önbellek, iOS yedekleri, geliştirici dosyaları. Hiçbiri otomatik seçilmez — neyi sileceğine sen karar verirsin.")
+                    .font(.iCallout).foregroundStyle(.secondary).multilineTextAlignment(.center).frame(maxWidth: 460)
                 GlassCard {
                     HStack(spacing: DS.Spacing.m) {
                         RiskBadge(level: .safe); Text("güvenle silinir").font(.iCaption).foregroundStyle(.secondary)

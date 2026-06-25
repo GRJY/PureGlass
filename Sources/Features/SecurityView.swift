@@ -61,9 +61,9 @@ struct SecurityView: View {
                     .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(.tint)
                 Text("Güvenlik Taraması").font(.dsDisplay(36))
-                Text("Mac'ine zararlı yazılım bulaşmış mı diye kontrol eder.\nAçılışta arka planda kendini çalıştıran gizli programları bulur, her birinin Apple onaylı (güvenli) olup olmadığını denetler ve şüphelileri işaretler.\n\nHer şey cihazında kalır — internete hiçbir veri gönderilmez.")
+                Text("Açılışta arka planda çalışan gizli programları bulur, Apple onaylı olup olmadıklarını denetler ve şüphelileri işaretler. Tüm veriler cihazında kalır.")
                     .font(.iCallout).foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center).frame(maxWidth: 560)
+                    .multilineTextAlignment(.center).frame(maxWidth: 460)
                 Button { Task { await model.scan() } } label: {
                     Label("Taramayı Başlat", systemImage: "shield")
                         .font(.iTitle3)
