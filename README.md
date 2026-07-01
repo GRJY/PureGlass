@@ -136,6 +136,26 @@ binaries breaks their code signature and risks breaking the app.)*
 
 ---
 
+## Download & Install
+
+Grab the latest **PureGlass.zip** from the [**Releases**](https://github.com/GRJY/PureGlass/releases/latest) page — no Homebrew, no Xcode, no build step required.
+
+```bash
+# 1. Unzip and move PureGlass.app into /Applications
+# 2. Clear the quarantine flag (required — see note below):
+xattr -dr com.apple.quarantine /Applications/PureGlass.app
+# 3. Open the app
+```
+
+> **Why step 2?** The app is ad-hoc signed and not notarized (no paid Apple Developer account), so macOS
+> Gatekeeper will otherwise refuse to open it ("PureGlass is damaged"). The `xattr` command removes the
+> download-quarantine flag and is the most reliable fix. Alternatively: **right-click → Open**, then **Open**
+> again in the dialog.
+
+Runs on both **Apple Silicon and Intel** (universal binary). Requires **macOS 26+**.
+
+---
+
 ## Requirements
 
 - macOS **26.0+** (Tahoe) — required for the Liquid Glass material
