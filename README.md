@@ -136,21 +136,32 @@ binaries breaks their code signature and risks breaking the app.)*
 
 ---
 
-## Download & Install
+## Download
 
-Grab the latest **PureGlass.zip** from the [**Releases**](https://github.com/GRJY/PureGlass/releases/latest) page — no Homebrew, no Xcode, no build step required.
+**One command — copy, paste into Terminal, done.** It downloads the latest build, installs it to
+`/Applications`, clears the macOS quarantine flag, and launches the app:
 
 ```bash
-# 1. Unzip and move PureGlass.app into /Applications
-# 2. Clear the quarantine flag (required — see note below):
-xattr -dr com.apple.quarantine /Applications/PureGlass.app
-# 3. Open the app
+curl -L https://github.com/GRJY/PureGlass/releases/latest/download/PureGlass.zip -o /tmp/PureGlass.zip && \
+  ditto -x -k /tmp/PureGlass.zip /Applications && \
+  xattr -dr com.apple.quarantine /Applications/PureGlass.app && \
+  open /Applications/PureGlass.app
 ```
 
-> **Why step 2?** The app is ad-hoc signed and not notarized (no paid Apple Developer account), so macOS
-> Gatekeeper will otherwise refuse to open it ("PureGlass is damaged"). The `xattr` command removes the
-> download-quarantine flag and is the most reliable fix. Alternatively: **right-click → Open**, then **Open**
-> again in the dialog.
+That's it. No Homebrew, no Xcode, no build step.
+
+<details>
+<summary>Prefer clicking instead of the Terminal?</summary>
+
+1. Download **PureGlass.zip** from the [**Releases**](https://github.com/GRJY/PureGlass/releases/latest) page and unzip it.
+2. Drag **PureGlass.app** into your **Applications** folder.
+3. On first launch macOS will block it — open **System Settings → Privacy & Security**, scroll down, and click **“Open Anyway.”**
+
+</details>
+
+> **Why does macOS block it?** PureGlass is ad-hoc signed but not notarized (no paid Apple Developer
+> account), so Gatekeeper stops it on first launch (“PureGlass is damaged”). The one command above clears
+> the download-quarantine flag for you — that's the only thing it does, and it's why it's the easy path.
 
 Runs on both **Apple Silicon and Intel** (universal binary). Requires **macOS 26+**.
 
