@@ -138,8 +138,19 @@ binaries breaks their code signature and risks breaking the app.)*
 
 ## Download
 
-**One command — copy, paste into Terminal, done.** It downloads the latest build, installs it to
-`/Applications`, clears the macOS quarantine flag, and launches the app:
+### Homebrew (recommended)
+
+```bash
+brew install --cask GRJY/tap/pureglass
+```
+
+That's the whole thing. Homebrew downloads it, installs it to `/Applications`, and clears the macOS
+quarantine flag for you — so it opens on the first try, no “damaged app” warning. Update the same way with
+`brew upgrade --cask pureglass`.
+
+### Or one command without Homebrew
+
+Downloads the latest build, installs it, clears quarantine, and launches:
 
 ```bash
 curl -L https://github.com/GRJY/PureGlass/releases/latest/download/PureGlass.zip -o /tmp/PureGlass.zip && \
@@ -147,8 +158,6 @@ curl -L https://github.com/GRJY/PureGlass/releases/latest/download/PureGlass.zip
   xattr -dr com.apple.quarantine /Applications/PureGlass.app && \
   open /Applications/PureGlass.app
 ```
-
-That's it. No Homebrew, no Xcode, no build step.
 
 <details>
 <summary>Prefer clicking instead of the Terminal?</summary>
