@@ -10,6 +10,14 @@ temperature and **fan control** (the job of Stats + Macs Fan Control, built in).
 Built from scratch in SwiftUI for **macOS 26 (Tahoe)** with Apple's genuine **Liquid Glass** material —
 not a glassmorphism fake.
 
+**Install in one line:**
+
+```bash
+brew install --cask GRJY/tap/pureglass
+```
+
+<sub>Other ways to install → [Download](#download)</sub>
+
 ![Smart Scan](assets/01-smart-scan.png)
 
 </div>
